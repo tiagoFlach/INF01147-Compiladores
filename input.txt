@@ -1,0 +1,34 @@
+char
+int
+float
+
+if
+else
+while
+read
+print
+return
+
+<-
+<=
+>=
+==
+!=
+
+;()[]{}+-./<>&|~
+
+asdasdasd
+ASDASDASD
+asdASD
+asd_ASD_asd_ASD
+
+123123123123
+
+2,5
+12,12
+123,12 
+1234,12
+12,1234
+
+'a'	'ab'	'abc'	'*'	'-'	']'	'¨'
+"abcd"	"abcd 123" "abcd 
