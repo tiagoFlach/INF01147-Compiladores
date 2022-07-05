@@ -38,23 +38,24 @@ return					{ return KW_RETURN; }
 "=="					{ return OPERATOR_EQ; }
 "!="					{ return OPERATOR_DIF; }
 
-[a-zA-Z_]*				{ return TK_IDENTIFIER; }
+{DIGIT}+				{ hashInsert(yytext, LIT_INTEGER); return LIT_INTEGER; }
+{DIGIT}","{DIGIT}		{ hashInsert(yytext, LIT_FLOAT); return LIT_FLOAT; }
+\'.\'					{ hashInsert(yytext, LIT_CHAR); return LIT_CHAR; }
+\"[^"]*\"				{ hashInsert(yytext, LIT_STRING); return LIT_STRING; }
 
-{DIGIT}+				{ return LIT_INTEGER; }
-{DIGIT}","{DIGIT}		{ return LIT_FLOAT; }
-"'".{1}"'"				{ return LIT_CHAR; }
-\".\"					{ return LIT_STRING; }
+[a-zA-Z_]*				{ hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
 
 [;()\[\]{}+-./<>&|~]	{ return yytext[0]; }
 
-"\n"					{ ++lineNumber; }	
 "##".*					{ }
 "\\#"					{ BEGIN(COMMENT); }
+"\n"					{ ++lineNumber; }	
+[ \t]					{ }
 
 .						{ return TOKEN_ERROR; }
 
-<COMMENT>"#\\"			{ BEGIN(INITIAL); }
 <COMMENT>"\n"			{ ++lineNumber; }
+<COMMENT>"#\\"			{ BEGIN(INITIAL); }
 <COMMENT>.				{ }
 
 %%

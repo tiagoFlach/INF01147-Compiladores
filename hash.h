@@ -27,5 +27,6 @@ int hashAddresses(char *text);
 HASH_NODE *hashFind(char *text);
 HASH_NODE *hashInsert(char *text, int type);
 void hashPrint(void);
+void hashPrintByType(int type);
 
 #endif

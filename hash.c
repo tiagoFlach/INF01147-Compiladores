@@ -67,3 +67,14 @@ void hashPrint(void)
 		for (node = Table[i]; node; node = node->next)
 			printf("Table[%d] has %d: %s\n", i, node->type, node->text);
 }
+
+void hashPrintByType(int type)
+{
+	int i;
+	HASH_NODE *node;
+	printf("\nType %d:\n", type);
+	for (i = 0; i < HASH_SIZE; ++i)
+		for (node = Table[i]; node; node = node->next)
+			if (node->type == type)
+				printf("%s\n", node->text);
+}

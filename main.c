@@ -41,17 +41,43 @@ int main(int argc, char** argv)
 
 		switch(token) 
 		{
-			case TOKEN_ERROR:
-				printf("Unexpected token %d: %c\n", token, yytext[0]);
+			case KW_CHAR:
+			case KW_INT:
+			case KW_FLOAT:
+			case KW_IF:
+			case KW_ELSE:
+			case KW_WHILE:
+			case KW_READ:
+			case KW_PRINT:
+			case KW_RETURN:
+			case ASSIGNMENT:
+			case OPERATOR_LE:
+			case OPERATOR_GE:
+			case OPERATOR_EQ:
+			case OPERATOR_DIF:
+			case TK_IDENTIFIER:
+			case LIT_INTEGER:
+			case LIT_FLOAT:
+			case LIT_CHAR:
+			case LIT_STRING:
 				break;
-			default:
-				hashInsert(yytext, token);
+			case TOKEN_ERROR: 
+				printf("Unexpected token in line %d: %d . %c\n", getLineNumber(), token, yytext[0]);
+				break;
+            default: 
+				printf("Especial character '%c' in line %d\n", yytext[0], getLineNumber()); 
 				break;
 		}
 	}
 
 	hashPrint();
-	printf("File has %d lines", getLineNumber());
+	printf("File has %d lines\n", getLineNumber());
+
+	// Print grouped by type
+	for (int i = 280; i <= 286; ++i)
+	{
+		hashPrintByType(i);
+	}
 
 	return 0;
 }

@@ -25,10 +25,25 @@ asd_ASD_asd_ASD
 123123123123
 
 2,5
+4.8
+4,5
 12,12
 123,12 
 1234,12
 12,1234
 
-'a'	'ab'	'abc'	'*'	'-'	']'	'¨'
+'a'	'ab'	'abc'	'*'	'-'	']'	'¨''¨'
+`-` 'c' '-'' '
+'
+'
+' 
+'
+'C
+'X''B'' ''*''.''
+
 "abcd"	"abcd 123" "abcd 
+"
+"oi
+ola
+hahahah"	"'a'"	"ola tudo bom12'a'3213213123"
+"string \"consecutiva\" aqui~"
