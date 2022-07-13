@@ -41,7 +41,7 @@ return					{ return KW_RETURN; }
 {DIGIT}+				{ hashInsert(yytext, LIT_INTEGER); return LIT_INTEGER; }
 {DIGIT}","{DIGIT}		{ hashInsert(yytext, LIT_FLOAT); return LIT_FLOAT; }
 \'.\'					{ hashInsert(yytext, LIT_CHAR); return LIT_CHAR; }
-\"[^"]*\"				{ hashInsert(yytext, LIT_STRING); return LIT_STRING; }
+\"(\\.|[^\\"])*\"			{ hashInsert(yytext, LIT_STRING); return LIT_STRING; }
 
 [a-zA-Z_]*				{ hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
 
@@ -50,7 +50,7 @@ return					{ return KW_RETURN; }
 "##".*					{ }
 "\\#"					{ BEGIN(COMMENT); }
 "\n"					{ ++lineNumber; }	
-[ \t]					{ }
+[ \t\r]					{ }
 
 .						{ return TOKEN_ERROR; }
 
