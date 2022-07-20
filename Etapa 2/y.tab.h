@@ -51,7 +51,7 @@ extern int yydebug;
   enum yytokentype
   {
     YYEMPTY = -2,
-    TK_EOF = 0,                    /* TK_EOF  */
+    YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     KW_CHAR = 258,                 /* KW_CHAR  */
@@ -79,7 +79,7 @@ extern int yydebug;
 #endif
 /* Token kinds.  */
 #define YYEMPTY -2
-#define TK_EOF 0
+#define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
 #define KW_CHAR 258

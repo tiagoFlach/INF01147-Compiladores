@@ -23,7 +23,6 @@
 %token LIT_STRING
 
 %token TOKEN_ERROR
-%token TK_EOF 0
 
 %left '&' '|'
 %left '<' '>' OPERATOR_EQ OPERATOR_DIF OPERATOR_LE OPERATOR_GE
@@ -34,7 +33,6 @@
 %%
 
 program:
-	TK_EOF
 	| dec_list
 	;
 
@@ -112,12 +110,10 @@ cmd:
 cmd_list: 
 	cmd ';' cmd_list
 	| cmd
-	|
 	;
 
 cmd_block:
 	'{' cmd_list '}'
-	| '{' '}'
 	;
 
 assignment:
@@ -131,7 +127,19 @@ expr:
 	| TK_IDENTIFIER '(' parameter_list ')'
 	| '(' expr ')'
 	| literal
-	| expr operator expr
+	| expr OPERATOR_EQ expr
+	| expr OPERATOR_LE expr
+	| expr OPERATOR_GE expr
+	| expr OPERATOR_DIF expr
+	| expr '+' expr
+	| expr '-' expr
+	| expr '.' expr
+	| expr '/' expr
+	| expr '<' expr
+	| expr '>' expr
+	| expr '&' expr
+	| expr '|' expr
+	| expr '~' expr
 	;
 
 
@@ -141,6 +149,7 @@ flow_cotrol:
 	KW_IF '(' expr ')' cmd
 	| KW_IF '(' expr ')' cmd KW_ELSE cmd
 	| KW_WHILE '(' expr ')' cmd
+	;
 
 
 /* Definições */
@@ -170,22 +179,6 @@ type:
 	KW_CHAR
 	| KW_INT
 	| KW_FLOAT
-	;
-
-operator: 
-	OPERATOR_EQ
-	| OPERATOR_LE
-	| OPERATOR_GE
-	| OPERATOR_DIF
-	| '+'
-	| '-'
-	| '.'
-	| '/'
-	| '<'
-	| '>'
-	| '&'
-	| '|'
-	| '~'
 	;
 
 %%
