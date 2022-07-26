@@ -8,11 +8,22 @@
  * Ainda sem grupo, providenciarei para a próxima etapa
  * 
  */
-#include "tokens.h"
+#include "y.tab.h"
 #include "hash.h"
 
 int running = 1;
 int lineNumber = 1;
+
+int isRunning(void)
+{
+	return running;
+}
+
+int getLineNumber(void)
+{
+	return lineNumber;
+}
+
 %}
 
 %x COMMENT
@@ -60,22 +71,14 @@ return					{ return KW_RETURN; }
 
 %%
 
+
+#include "y.tab.c"
 #include "hash.c"
 #include "main.c"
 
 void initMe(void)
 {
 	hashInit();
-}
-
-int isRunning(void)
-{
-	return running;
-}
-
-int getLineNumber(void)
-{
-	return lineNumber;
 }
 
 int yywrap()
