@@ -1,34 +1,25 @@
 %{
-/**
+/*
  * 
- * UFRGS - Compiladores B - Marcelo Johann - 2022/1 - Etapa 1
+ * UFRGS - Compiladores B - Marcelo Johann - 2022/1
  * 
  * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
- * 
- * Ainda sem grupo, providenciarei para a próxima etapa
+ * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
-#include "y.tab.h"
+#include "parser.tab.h"
 #include "hash.h"
 
-int running = 1;
-int lineNumber = 1;
+int running;
+int lineNumber;
 
-int isRunning(void)
-{
-	return running;
-}
-
-int getLineNumber(void)
-{
-	return lineNumber;
-}
+int isRunning() 	{ return running; }
+int getLineNumber() { return lineNumber; }
 
 %}
 
 %x COMMENT
 DIGIT	[0-9]
-CHAR	[a-zA-Z]
 
 %%
 
@@ -72,12 +63,12 @@ return					{ return KW_RETURN; }
 %%
 
 
-#include "y.tab.c"
+#include "parser.tab.c"
 #include "hash.c"
-#include "main.c"
 
-void initMe(void)
+void initMe()
 {
+	lineNumber = 1; running = 1;
 	hashInit();
 }
 

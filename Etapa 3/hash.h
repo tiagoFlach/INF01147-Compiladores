@@ -1,15 +1,13 @@
-/**
+/*
  * 
- * UFRGS - Compiladores B - Marcelo Johann - 2022/1 - Etapa 1
+ * UFRGS - Compiladores B - Marcelo Johann - 2022/1
  * 
  * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
- * 
- * Ainda sem grupo, providenciarei para a próxima etapa
+ * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
 
-#ifndef HASH_HEADER
-#define HASH_HEADER
+#pragma once
 
 #include <stdio.h>
 
@@ -28,5 +26,3 @@ HASH_NODE *hashFind(char *text);
 HASH_NODE *hashInsert(char *text, int type);
 void hashPrint(void);
 void hashPrintByType(int type);
-
-#endif

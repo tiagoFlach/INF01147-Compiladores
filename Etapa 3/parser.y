@@ -1,6 +1,13 @@
 
 %{
-        //Autor: Arthur Prochnow Baumgardt
+/*
+ * 
+ * UFRGS - Compiladores B - Marcelo Johann - 2022/1
+ * 
+ * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
+ * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
+ * 
+ */
         int yylex(void); 
         int yyerror(const char* s);
         int getLineNumber();

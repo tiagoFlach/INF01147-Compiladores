@@ -1,12 +1,18 @@
-/**
+/*
  * 
- * UFRGS - Compiladores B - Marcelo Johann - 2022/1 - Etapa 1
+ * UFRGS - Compiladores B - Marcelo Johann - 2022/1
  * 
  * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
- * 
- * Ainda sem grupo, providenciarei para a próxima etapa
+ * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "lex.yy.h"
+
+extern int yyparse();
+extern int hashPrint();
 
 void initMe(void);
 int isRunning(void);
