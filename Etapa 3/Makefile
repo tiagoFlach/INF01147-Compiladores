@@ -10,6 +10,7 @@ TEST=0
 MAIN=main
 OUT=etapa3
 HASH=hash
+AST=ast
 LEX=lex.yy
 YAC=parser.tab
 
@@ -18,8 +19,8 @@ ifeq ($(TEST),1)
 FLAGS+= -Wcounterexamples
 endif
 
-$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) 
-			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o 
+$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) $(AST)
+			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o $(AST).o
 %:			%.c
 			gcc -c $@.c
 $(LEX).c: 	scanner.l
