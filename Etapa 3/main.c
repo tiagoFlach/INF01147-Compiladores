@@ -6,7 +6,6 @@
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "lex.yy.h"

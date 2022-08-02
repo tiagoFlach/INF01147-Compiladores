@@ -8,10 +8,17 @@
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
-        int yylex(void); 
-        int yyerror(const char* s);
-        int getLineNumber();
+#include "hash.h"
+
+int yylex(void); 
+int yyerror(const char* s);
+int getLineNumber();
 %}
+
+%union
+{
+HASH_NODE *symbol;
+}
 
 %token KW_CHAR 
 %token KW_INT  
@@ -30,12 +37,12 @@
 %token OPERATOR_EQ 
 %token OPERATOR_DIF
 
-%token TK_IDENTIFIER
+%token<symbol> TK_IDENTIFIER
 
-%token LIT_INTEGER 
-%token LIT_FLOAT 
-%token LIT_CHAR
-%token LIT_STRING 
+%token<symbol> LIT_INTEGER 
+%token<symbol> LIT_FLOAT 
+%token<symbol> LIT_CHAR
+%token<symbol> LIT_STRING 
 
 %token TOKEN_ERROR 
 

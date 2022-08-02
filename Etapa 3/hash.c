@@ -6,7 +6,8 @@
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
-
+#include <string.h>
+#include <stdlib.h>
 #include "hash.h"
 
 HASH_NODE *Table[HASH_SIZE];

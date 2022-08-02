@@ -18,8 +18,8 @@ ifeq ($(TEST),1)
 FLAGS+= -Wcounterexamples
 endif
 
-$(OUT):		$(YAC) $(LEX) $(MAIN) 
-			gcc -o $(OUT) $(LEX).o $(MAIN).o
+$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) 
+			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o 
 %:			%.c
 			gcc -c $@.c
 $(LEX).c: 	scanner.l
@@ -27,4 +27,4 @@ $(LEX).c: 	scanner.l
 $(YAC).c:	parser.y
 			bison parser.y $(FLAGS)
 clean:
-			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' \) -type f -delete
+			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' -o -name '*.output' \) -type f -delete
