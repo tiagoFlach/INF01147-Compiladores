@@ -17,6 +17,10 @@ void initMe(void);
 int isRunning(void);
 int getLineNumber(void);
 
+extern FILE *yyin;
+FILE *out;
+// extern AST *ASTroot;
+
 int main(int argc, char** argv)
 {
 	int token = 0;
@@ -37,16 +41,20 @@ int main(int argc, char** argv)
 		exit(2);
 	}
 
+	// Falha ao abrir o arquivo
+	if ((out = fopen(argv[1], "r")) == 0)
+	{
+		printf("Cannot open file %s... \n", argv[1]);
+		exit(2);
+	}
+
 	yyparse();
 
-	hashPrint();
-	printf("File has %d lines\n", getLineNumber());
+	// hashPrint();
+	// astDecompile(ASTroot, out);
+	// astDecompile(ASTroot, out);
 
-	// Print grouped by type
-	// for (int i = 272; i < 277; ++i)
-	// {
-	// 	hashPrintByType(i);
-	// }
+	printf("File has %d lines\n", getLineNumber());
 
 	exit(0);
 }
