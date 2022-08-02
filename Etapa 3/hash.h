@@ -6,7 +6,6 @@
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
  * 
  */
-
 #pragma once
 
 #include <stdio.h>

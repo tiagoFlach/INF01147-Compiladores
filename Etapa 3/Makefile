@@ -10,6 +10,7 @@ TEST=0
 MAIN=main
 OUT=etapa3
 HASH=hash
+AST=ast
 LEX=lex.yy
 YAC=parser.tab
 
@@ -18,8 +19,8 @@ ifeq ($(TEST),1)
 FLAGS+= -Wcounterexamples
 endif
 
-$(OUT):		$(YAC) $(LEX) $(MAIN) 
-			gcc -o $(OUT) $(LEX).o $(MAIN).o
+$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) $(AST)
+			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o $(AST).o
 %:			%.c
 			gcc -c $@.c
 $(LEX).c: 	scanner.l
@@ -27,4 +28,4 @@ $(LEX).c: 	scanner.l
 $(YAC).c:	parser.y
 			bison parser.y $(FLAGS)
 clean:
-			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' \) -type f -delete
+			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' -o -name '*.output' \) -type f -delete
