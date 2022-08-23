@@ -8,7 +8,7 @@
 #
 TEST=0
 MAIN=main
-OUT=etapa3
+OUT=etapa4
 HASH=hash
 AST=ast
 LEX=lex.yy

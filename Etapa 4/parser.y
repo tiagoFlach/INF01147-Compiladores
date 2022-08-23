@@ -165,20 +165,20 @@ var:    TK_IDENTIFIER                           { $$ = astCreate(AST_VAR,$1,0,0,
 
 expr:   lit                                     { $$ = $1; }
         | var                                   { $$ = $1; }
-        | expr '+' expr                         { $$ = astCreate(AST_ADD,0,$1,$3,0,0); }
-        | expr '-' expr                         { $$ = astCreate(AST_SUB,0,$1,$3,0,0); }
-        | expr '/' expr                         { $$ = astCreate(AST_DIV,0,$1,$3,0,0); }
-        | expr '.' expr                         { $$ = astCreate(AST_MUL,0,$1,$3,0,0); }
-        | expr '<' expr                         { $$ = astCreate(AST_LSR,0,$1,$3,0,0); }
-        | expr '>' expr                         { $$ = astCreate(AST_GTR,0,$1,$3,0,0); }
-        | expr '&' expr                         { $$ = astCreate(AST_AND,0,$1,$3,0,0); }
-        | expr '|' expr                         { $$ = astCreate(AST_OR ,0,$1,$3,0,0); }
-        | expr '~' expr                         { $$ = astCreate(AST_NOT,0,$1,$3,0,0); }
-        | expr OPERATOR_LE expr                 { $$ = astCreate(AST_LSE,0,$1,$3,0,0); }
-        | expr OPERATOR_GE expr                 { $$ = astCreate(AST_GTE,0,$1,$3,0,0); }
-        | expr OPERATOR_EQ expr                 { $$ = astCreate(AST_EQU,0,$1,$3,0,0); }
-        | expr OPERATOR_DIF expr                { $$ = astCreate(AST_DIF,0,$1,$3,0,0); }
-        | '(' expr ')'                          { $$ = $2; }
+        | expr '+' expr                         { $$ = astCreate(AST_ADD,0,$1,$3,0,0);  }
+        | expr '-' expr                         { $$ = astCreate(AST_SUB,0,$1,$3,0,0);  }
+        | expr '/' expr                         { $$ = astCreate(AST_DIV,0,$1,$3,0,0);  }
+        | expr '.' expr                         { $$ = astCreate(AST_MUL,0,$1,$3,0,0);  }
+        | expr '<' expr                         { $$ = astCreate(AST_LSR,0,$1,$3,0,0);  }
+        | expr '>' expr                         { $$ = astCreate(AST_GTR,0,$1,$3,0,0);  }
+        | expr '&' expr                         { $$ = astCreate(AST_AND,0,$1,$3,0,0);  }
+        | expr '|' expr                         { $$ = astCreate(AST_OR ,0,$1,$3,0,0);  }
+        | expr '~' expr                         { $$ = astCreate(AST_NOT,0,$1,$3,0,0);  }
+        | expr OPERATOR_LE expr                 { $$ = astCreate(AST_LSE,0,$1,$3,0,0);  }
+        | expr OPERATOR_GE expr                 { $$ = astCreate(AST_GTE,0,$1,$3,0,0);  }
+        | expr OPERATOR_EQ expr                 { $$ = astCreate(AST_EQU,0,$1,$3,0,0);  }
+        | expr OPERATOR_DIF expr                { $$ = astCreate(AST_DIF,0,$1,$3,0,0);  }
+        | '(' expr ')'                          { $$ = astCreate(AST_EXPN,0,$2,0,0,0);  }
         | TK_IDENTIFIER '(' exprl ')'           { $$ = astCreate(AST_CALL,$1,$3,0,0,0); }
         ;
 
