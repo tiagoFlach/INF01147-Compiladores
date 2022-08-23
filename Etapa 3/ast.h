@@ -38,6 +38,7 @@ enum astConst {
     AST_CMD,
     AST_LCMD,
     AST_LCMDT,
+    AST_EXPN,
 // Variables
     AST_VAR,
     AST_VECTOR,

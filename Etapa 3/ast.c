@@ -13,7 +13,7 @@ extern FILE *out;
 
 char * nodeType[AST_PROGRAM+1] = {
     "AST_SYMBOL", "AST_ADD", "AST_SUB", "AST_DIV", "AST_MUL", "AST_LSR", "AST_GTR", "AST_AND", "AST_OR", "AST_NOT", "AST_LSE", "AST_GTE", "AST_EQU", "AST_DIF", "AST_ASSIGN",
-    "AST_DEC", "AST_CMD", "AST_LCMD", "AST_LCMDT", "AST_VAR", "AST_VECTOR", "AST_MSG", "AST_MSGL", "AST_IF", "AST_IF_ELSE", "AST_WHILE", "AST_READ", "AST_PRINT", 
+    "AST_DEC", "AST_CMD", "AST_LCMD", "AST_LCMDT", "AST_VAR", "AST_VECTOR", "AST_MSG", "AST_MSGL", "AST_IF", "AST_IF_ELSE", "AST_WHILE", "AST_READ", "AST_PRINT", "AST_EXPN",
 	"AST_RETURN", "AST_CALL", "AST_CHAR", "AST_FLOAT", "AST_INT", "AST_INTV", "AST_LFTOP", "AST_EXPL", "AST_ARGL", "AST_DECL", "AST_BLCK", "AST_PROGRAM"
 };
 
@@ -155,6 +155,11 @@ void astDecompile(AST *node)
 			fprintf(out,";\n");
 			astDecompile(node->son[0]);
 			astDecompile(node->son[1]);
+			break;
+		case AST_EXPN:
+			fprintf(out,"(");
+			astDecompile(node->son[0]);
+			fprintf(out,")");
 			break;
 		case AST_VAR:
 			fprintf(out,"%s",node->symbol->text);
