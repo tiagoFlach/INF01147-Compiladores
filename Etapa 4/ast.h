@@ -15,53 +15,53 @@
 // ----------
 enum astConst {
     AST_SYMBOL,
-// Mathematics
+	// Mathematics
     AST_ADD,
     AST_SUB,
     AST_DIV,
     AST_MUL,
-// Comparison
+	// Comparison
     AST_LSR,
     AST_GTR,
-// Logic
+	// Logic
     AST_AND,
     AST_OR,
     AST_NOT,
-// Operators
+	// Operators
     AST_LSE,
     AST_GTE,
     AST_EQU,
     AST_DIF,
     AST_ASSIGN,
-// Commands
+	// Commands
     AST_DEC,
     AST_CMD,
     AST_LCMD,
     AST_LCMDT,
     AST_EXPN,
-// Variables
+	// Variables
     AST_VAR,
     AST_VECTOR,
-// Message
+	// Message
     AST_MSG,
     AST_MSGL,
-// Conditions
+	// Conditions
     AST_IF,
     AST_IF_ELSE,
     AST_WHILE,
-// Functions
+	// Functions
     AST_READ,
     AST_PRINT,
     AST_RETURN,
     AST_CALL,
-// Type
+	// Type
     AST_CHAR,
     AST_FLOAT,
     AST_INT,
-// Initialization
+	// Initialization
     AST_INTV,
     AST_LFTOP,
-// Lists
+	// Lists
     AST_EXPL,
     AST_ARGL,
     AST_DECL,
