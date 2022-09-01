@@ -103,33 +103,36 @@ void check_undeclared() { SemanticErrors += hashCheckUndeclared(); }
 void check_operands(AST *node)
 {
 	int i;
+	char *stringType;
 
 	if (node == 0)
 		return;
 
+	// FLOAT
 	switch (node->type)
 	{
-		case AST_ADD: 
-		case AST_SUB:
-		case AST_DIV:
-		case AST_MUL:
-		case AST_LSR:
-		case AST_GTR:
-		case AST_LSE:
-		case AST_GTE:
-		case AST_EQU:
-		case AST_DIF: 
-			if(!is_number(node->son[0]))
-			{
-				fprintf(stderr, "Semantic ERROR: Invalid left operand for ADD\n");
-				++SemanticErrors;
-			} 
-			if(!is_number(node->son[1]))
-			{
-				fprintf(stderr, "Semantic ERROR: Invalid right operand for ADD\n");
-				++SemanticErrors;
-			} 
-			break;
+		case AST_ADD: stringType = "ADD"; break;
+		case AST_SUB: stringType = "SUB"; break;
+		case AST_DIV: stringType = "DIV"; break;
+		case AST_MUL: stringType = "MUL"; break;
+		case AST_LSR: stringType = "LSR"; break;
+		case AST_GTR: stringType = "GTR"; break;
+		case AST_LSE: stringType = "LSE"; break;
+		case AST_GTE: stringType = "GTE"; break;
+		case AST_EQU: stringType = "EQU"; break;
+		case AST_DIF: stringType = "DIF"; break;	
+	}
+
+	if(!is_number(node->son[0]))
+	{
+		fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", stringType);
+		++SemanticErrors;
+	}
+
+	if(!is_number(node->son[1]))
+	{
+		fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", stringType);
+		++SemanticErrors;
 	}
 
 	for (i=0; i<MAX_SONS; ++i)
@@ -212,6 +215,7 @@ void check_return(AST *node, int ret)
 	for (i=0; i<MAX_SONS; ++i)
 		check_return(node->son[i], ret);
 }
+
 void check_function_arguments(AST *node)
 {
 
@@ -226,11 +230,11 @@ void check_nature(AST *node)
 
 	switch (node->type)
 	{
-	case AST_VECTOR:  break;
-	case AST_VAR:  break;
-	
-	default:
-		break;
+		case AST_VECTOR: break;
+		case AST_VAR: break;
+		
+		default:
+			break;
 	}
 	
 	for (i=0; i<MAX_SONS; ++i)
