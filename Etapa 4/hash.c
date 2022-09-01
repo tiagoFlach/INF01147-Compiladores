@@ -65,7 +65,7 @@ void hashPrint(void)
 	HASH_NODE *node;
 	for (i = 0; i < HASH_SIZE; ++i)
 		for (node = Table[i]; node; node = node->next)
-			printf("Table[%d] has %d: %s\n", i, node->type, node->text);
+			printf("Table[%d] has %s: type %d, datatype %d\n", i, node->text, node->type, node->datatype);
 }
 
 void hashPrintByType(int type)
@@ -77,4 +77,19 @@ void hashPrintByType(int type)
 		for (node = Table[i]; node; node = node->next)
 			if (node->type == type)
 				printf("%s\n", node->text);
+}
+
+int hashCheckUndeclared()
+{
+	int undeclared = 0;
+	int i;
+	HASH_NODE *node;
+	for (i = 0; i < HASH_SIZE; ++i)
+		for (node = Table[i]; node; node = node->next)
+			if(node->type == HASH_IDT)
+			{
+				fprintf(stderr,"Semantic ERROR: variable %s undeclared\n", node->text);
+				++undeclared;
+			}
+	return undeclared;
 }

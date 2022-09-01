@@ -8,10 +8,11 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include "semantic.h"
 #include "lex.yy.h"
 
 extern int yyparse();
-extern int hashPrint();
+extern void hashPrint();
 
 void initMe(void);
 int isRunning(void);
@@ -26,6 +27,7 @@ extern AST *ASTroot;
 int main(int argc, char** argv)
 {
 	int token = 0;
+	int serrors = 0;
 
 	initMe();
 
@@ -53,7 +55,15 @@ int main(int argc, char** argv)
 	yyparse();
 
 	hashPrint();
+	astPrint(ASTroot, 0);
 	astDecompile(ASTroot);
+	check_semantic(ASTroot);
+
+	if((serrors = get_semantic_errors()) != 0)
+	{
+		printf("Compilation aborted! %d semantic errors!\n", serrors);
+		exit(4);
+	}
 
 	printf("File has %d lines\n", getLineNumber());
 

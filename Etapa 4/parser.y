@@ -90,11 +90,7 @@
 
 %%
 
-program: decl		                        { 
-                                                        ASTroot = $1; 
-                                                        astPrint($1,0); 
-                                                        check_and_set_declarations($1); 
-                                                }
+program: decl		                        { ASTroot = $1; }
         ;
 
 decl:   dec decl                                { $$ = astCreate(AST_DECL,0,$1,$2,0,0); }

@@ -33,6 +33,7 @@ char * nodeType[AST_PROGRAM+1] = {
 	"AST_CMD", 
 	"AST_LCMD", 
 	"AST_LCMDT", 
+    "AST_EXPN",
 	"AST_VAR", 
 	"AST_VECTOR", 
 	"AST_MSG", 

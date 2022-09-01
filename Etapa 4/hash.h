@@ -12,7 +12,7 @@
 
 #define HASH_SIZE 997
 
-enum hashConst {
+enum hashSymbol {
 	HASH_IDT,
 	HASH_VAR,
 	HASH_VEC,
@@ -24,9 +24,17 @@ enum hashConst {
 	HASH_LIT_S
 };
 
+enum hashData {
+	HASH_UNKNOW,
+	HASH_DATA_I,
+	HASH_DATA_C,
+	HASH_DATA_F
+};
+
 typedef struct hash_node
 {
 	int type;
+	int datatype;
 	char *text;
 	struct hash_node *next;
 } HASH_NODE;
@@ -37,3 +45,4 @@ HASH_NODE *hashFind(char *text);
 HASH_NODE *hashInsert(char *text, int type);
 void hashPrint(void);
 void hashPrintByType(int type);
+int hashCheckUndeclared();
