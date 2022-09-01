@@ -124,14 +124,14 @@ void check_operands(AST *node)
 		case AST_EQU: stringType = "EQU"; break;
 		case AST_DIF: stringType = "DIF"; break;	
 	}
-
+	int firstFloat = (node->son[0]->symbol->datatype == HASH_DATA_F || node->son[0]->symbol->type == HASH_LIT_F);
 	if(!is_number(node->son[0]))
 	{
 		fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", stringType);
 		++SemanticErrors;
 	}
-
-	if(!is_number(node->son[1]))
+	int secondFloat = (node->son[1]->symbol->datatype == HASH_DATA_F || node->son[1]->symbol->type == HASH_LIT_F);
+	if(!is_number(node->son[1]) || (firstFloat != secondFloat))
 	{
 		fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", stringType);
 		++SemanticErrors;
