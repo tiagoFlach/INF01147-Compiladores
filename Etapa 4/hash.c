@@ -2,8 +2,8 @@
  * 
  * UFRGS - Compiladores B - Marcelo Johann - 2022/1
  * 
- * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
+ * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
  * 
  */
 #include <string.h>
@@ -88,7 +88,7 @@ int hashCheckUndeclared()
 		for (node = Table[i]; node; node = node->next)
 			if(node->type == HASH_IDT)
 			{
-				fprintf(stderr,"Semantic ERROR: variable %s undeclared\n", node->text);
+				fprintf(stderr,"Semantic ERROR: identifier %s undeclared\n", node->text);
 				++undeclared;
 			}
 	return undeclared;
