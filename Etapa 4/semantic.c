@@ -2,8 +2,8 @@
  * 
  * UFRGS - Compiladores B - Marcelo Johann - 2022/1
  * 
- * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
  * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
+ * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
  * 
  */
 
@@ -18,9 +18,9 @@ int get_datatype(int ast_const)
 {
 	switch (ast_const)
 	{
-	case AST_CHAR: 	return HASH_DATA_C; break;
-	case AST_FLOAT: return HASH_DATA_F; break;
-	case AST_INT: 	return HASH_DATA_I; break;
+		case AST_CHAR: 	return HASH_DATA_C; break;
+		case AST_FLOAT: return HASH_DATA_F; break;
+		case AST_INT: 	return HASH_DATA_I; break;
 	}
 }
 
@@ -116,7 +116,18 @@ void check_operands(AST *node)
 				++SemanticErrors;
 			} 
 		break;
-		// case AST_SUB: break;
+		case AST_SUB: 
+			if(!is_number(node->son[0]))
+			{
+				fprintf(stderr, "Semantic ERROR: Invalid left operand for SUB\n");
+				++SemanticErrors;
+			} 
+			if(!is_number(node->son[1]))
+			{
+				fprintf(stderr, "Semantic ERROR: Invalid right operand for SUB\n");
+				++SemanticErrors;
+			} 
+		break;
 		// case AST_DIV: break;
 		// case AST_MUL: break;
 		// case AST_LSR: break;
