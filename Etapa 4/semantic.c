@@ -110,7 +110,6 @@ void check_operands(AST *node)
 	if (node == 0)
 		return;
 
-	// FLOAT
 	switch (node->type)
 	{
 		case AST_ADD: stringType = "ADD"; break;
@@ -122,20 +121,27 @@ void check_operands(AST *node)
 		case AST_LSE: stringType = "LSE"; break;
 		case AST_GTE: stringType = "GTE"; break;
 		case AST_EQU: stringType = "EQU"; break;
-		case AST_DIF: stringType = "DIF"; break;	
+		case AST_DIF: stringType = "DIF"; break;
 	}
-	int firstFloat = (node->son[0]->symbol->datatype == HASH_DATA_F || node->son[0]->symbol->type == HASH_LIT_F);
-	if(!is_number(node->son[0]))
-	{
-		fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", stringType);
-		++SemanticErrors;
-	}
-	int secondFloat = (node->son[1]->symbol->datatype == HASH_DATA_F || node->son[1]->symbol->type == HASH_LIT_F);
-	if(!is_number(node->son[1]) || (firstFloat != secondFloat))
-	{
-		fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", stringType);
-		++SemanticErrors;
-	}
+	if((node->type < AST_AND) || ((node->type > AST_NOT) && (node->type < AST_ASSIGN)))
+		if(node->son[0] && node->son[0]->symbol)
+		{
+			int firstFloat = (node->son[0]->symbol->datatype == HASH_DATA_F || node->son[0]->symbol->type == HASH_LIT_F);
+			if(!is_number(node->son[0]))
+			{
+				fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", stringType);
+				++SemanticErrors;
+			}
+			if(node->son[1] && node->son[1]->symbol)
+			{
+				int secondFloat = (node->son[1]->symbol->datatype == HASH_DATA_F || node->son[1]->symbol->type == HASH_LIT_F);
+				if(!is_number(node->son[1]) || (firstFloat != secondFloat))
+				{
+					fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", stringType);
+					++SemanticErrors;
+				}
+			}
+		} 
 
 	for (i=0; i<MAX_SONS; ++i)
 		check_operands(node->son[i]);
@@ -205,9 +211,9 @@ void check_return(AST *node, int ret)
 	
 	if(node->type == AST_RETURN)
 	{	
-		if((node->son[0]->symbol->type == HASH_UNKNOW && (node->son[0]->symbol->datatype != ret)) ||
+		if(!node->son[0] || (node->son[0]->symbol && ((node->son[0]->symbol->type == HASH_UNKNOW && (node->son[0]->symbol->datatype != ret)) ||
 		  ((ret == HASH_DATA_C || ret == HASH_DATA_I) && !is_number(node->son[0])) || 
-		  (ret == HASH_DATA_F && (node->son[0]->symbol->type != HASH_LIT_F && node->son[0]->symbol->datatype != HASH_DATA_F)))
+		  (ret == HASH_DATA_F && (node->son[0]->symbol->type != HASH_LIT_F && node->son[0]->symbol->datatype != HASH_DATA_F)))))
 		{
 			fprintf(stderr, "Semantic ERROR: Invalid return type\n");
 			++SemanticErrors;
