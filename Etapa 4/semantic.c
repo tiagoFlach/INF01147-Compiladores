@@ -24,12 +24,14 @@ int get_datatype(int ast_const)
 	}
 }
 
+AST* get_expr_leaf(AST* node){ while (node->son[0] != NULL) node = node->son[0]; return node; }
+
 int is_number(AST *node)
 {
 	return 	(node->type == AST_ADD || node->type == AST_SUB || 
 			(node->type == AST_SYMBOL && (node->symbol->type == HASH_LIT_I || 
-			(node->symbol->type == HASH_LIT_C) || (node->symbol->type == HASH_VAR && 
-			(node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C)))) ||
+			node->symbol->type == HASH_LIT_C) || (node->symbol->type == HASH_VAR && 
+			(node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C))) ||
 			(node->type == AST_CALL && (node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C)));
 }
 
@@ -214,7 +216,41 @@ void check_return(AST *node, int ret)
 }
 void check_function_arguments(AST *node)
 {
+	int i;
 
+	if (node == 0)
+		return;
+
+	if(node->type == AST_CALL)
+	{
+		AST* darg = node->symbol->dec->son[1];
+		AST* carg = node->son[0];
+		while((darg != NULL) && (carg != NULL))
+		{
+			AST* cleaf = get_expr_leaf(carg);
+			if(((darg->symbol->datatype == HASH_DATA_C || darg->symbol->datatype == HASH_DATA_I) && !is_number(cleaf)) || 
+		  		(darg->symbol->datatype == HASH_DATA_F && (cleaf->symbol->type != HASH_LIT_F && cleaf->symbol->datatype != HASH_DATA_F)))
+			{
+				fprintf(stderr, "Semantic ERROR: Incorrect argument datatype\n");
+				++SemanticErrors;
+			}
+			darg = darg->son[1];
+			carg = carg->son[1];
+		}
+		if((darg == NULL) && (carg != NULL))
+		{
+			fprintf(stderr, "Semantic ERROR: Too many arguments in function call\n");
+			++SemanticErrors;
+		}
+		else if((darg != NULL) && (carg == NULL))
+		{
+			fprintf(stderr, "Semantic ERROR: Few arguments in function call\n");
+			++SemanticErrors;
+		}
+	}
+
+	for (i=0; i<MAX_SONS; ++i)
+		check_function_arguments(node->son[i]);
 }
 
 void check_nature(AST *node)
@@ -246,5 +282,5 @@ void check_semantic(AST *node)
 	check_vec(node,0,0,0);
 	// check_nature(node);
 	check_return(node, 0);
-	// check_function_arguments(node);
+	check_function_arguments(node);
 }

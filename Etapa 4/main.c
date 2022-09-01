@@ -53,11 +53,12 @@ int main(int argc, char** argv)
 	}
 
 	yyparse();
+	
+	astDecompile(ASTroot);
+	check_semantic(ASTroot);
 
 	hashPrint();
 	astPrint(ASTroot, 0);
-	astDecompile(ASTroot);
-	check_semantic(ASTroot);
 
 	if((serrors = get_semantic_errors()) != 0)
 	{

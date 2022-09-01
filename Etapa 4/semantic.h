@@ -15,6 +15,7 @@ extern int SemanticErrors;
 
 int get_semantic_errors();
 int get_datatype(int ast_const);
+AST* get_expr_leaf(AST* node);
 
 int is_number(AST *node);
 
@@ -26,6 +27,5 @@ void check_vec(AST *node, int vsize, int current, int dtype);
 void check_return(AST *node, int ret);
 void check_function_arguments(AST *node);
 void check_nature(AST *node);
-void check_datatype(AST *node);
 
 void check_semantic(AST *node);
