@@ -28,8 +28,9 @@ int is_number(AST *node)
 {
 	return 	(node->type == AST_ADD || node->type == AST_SUB || 
 			(node->type == AST_SYMBOL && (node->symbol->type == HASH_LIT_I || 
-			(node->symbol->type == HASH_VAR && node->symbol->datatype == HASH_DATA_I))) ||
-			(node->type == AST_CALL && node->symbol->datatype == HASH_DATA_I));
+			(node->symbol->type == HASH_LIT_C) || (node->symbol->type == HASH_VAR && 
+			(node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C)))) ||
+			(node->type == AST_CALL && (node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C)));
 }
 
 void check_and_set_declarations(AST *node)
@@ -50,6 +51,7 @@ void check_and_set_declarations(AST *node)
 					++SemanticErrors;
 				}
 				node->symbol->type = HASH_VAR;
+				node->symbol->dec = node;
 				if(node->son[0])
 					node->symbol->datatype = get_datatype(node->son[0]->type);
 			}
@@ -63,6 +65,7 @@ void check_and_set_declarations(AST *node)
 					++SemanticErrors;
 				}
 				node->symbol->type = HASH_VEC;
+				node->symbol->dec = node;
 				if(node->son[0])
 					node->symbol->datatype = get_datatype(node->son[0]->type);
 			}
@@ -76,6 +79,7 @@ void check_and_set_declarations(AST *node)
 					++SemanticErrors;
 				}
 				node->symbol->type = HASH_FUN;
+				node->symbol->dec = node;
 				if(node->son[0])
 					node->symbol->datatype = get_datatype(node->son[0]->type);
 			}
@@ -83,6 +87,7 @@ void check_and_set_declarations(AST *node)
 		case AST_ARGL:
 			if (node->symbol){
 				node->symbol->type = HASH_VAR;
+				node->symbol->dec = node;
 				if(node->son[0])
 					node->symbol->datatype = get_datatype(node->son[0]->type);
 			}
@@ -105,6 +110,15 @@ void check_operands(AST *node)
 	switch (node->type)
 	{
 		case AST_ADD: 
+		case AST_SUB:
+		case AST_DIV:
+		case AST_MUL:
+		case AST_LSR:
+		case AST_GTR:
+		case AST_LSE:
+		case AST_GTE:
+		case AST_EQU:
+		case AST_DIF: 
 			if(!is_number(node->son[0]))
 			{
 				fprintf(stderr, "Semantic ERROR: Invalid left operand for ADD\n");
@@ -115,21 +129,7 @@ void check_operands(AST *node)
 				fprintf(stderr, "Semantic ERROR: Invalid right operand for ADD\n");
 				++SemanticErrors;
 			} 
-		break;
-		// case AST_SUB: break;
-		// case AST_DIV: break;
-		// case AST_MUL: break;
-		// case AST_LSR: break;
-		// case AST_GTR: break;
-		// case AST_AND: break;
-		// case AST_OR: break;
-		// case AST_NOT: break;
-		// case AST_LSE: break;
-		// case AST_GTE: break;
-		// case AST_EQU: break;
-		// case AST_DIF: break;
-		// case AST_EXPN: break;
-		// case AST_CALL: break;
+			break;
 	}
 
 	for (i=0; i<MAX_SONS; ++i)
@@ -143,10 +143,13 @@ void check_vec_index(AST *node)
 	if (node == 0)
 		return;
 	
-	if(node->type == AST_VECTOR)
+	if(node->type == AST_VECTOR && node->symbol->dec != NULL)
 	{
-		if(!is_number(node->son[0]) || (0)) // tem que pegar expressao tbm
-		{									// achar maneira de salvar ponteiro da declaracao de funcoes, vetores e variaveis pra usar aqui e em outros lugares
+		int decsize = atoi(node->symbol->dec->son[1]->symbol->text);
+		int indsize, isInteger = 0;
+		if(node->son[0]->symbol->type == HASH_LIT_I) { isInteger = 1; indsize = atoi(node->son[0]->symbol->text); }
+		if(!is_number(node->son[0]) || (isInteger && (indsize >= decsize)))
+		{
 			fprintf(stderr, "Semantic ERROR: Invalid vector index\n");
 			++SemanticErrors;
 		} 
@@ -185,9 +188,29 @@ void check_vec(AST *node, int vsize, int current, int dtype)
 		check_vec(node->son[i], vsize, current, dtype);
 }
 
-void check_return(AST *node)
+void check_return(AST *node, int ret)
 {
+	int i;
 
+	if (node == 0)
+		return;
+
+	if(node->type == AST_DECFUN) 
+		ret = node->symbol->datatype;
+	
+	if(node->type == AST_RETURN)
+	{	
+		if((node->son[0]->symbol->type == HASH_UNKNOW && (node->son[0]->symbol->datatype != ret)) ||
+		  ((ret == HASH_DATA_C || ret == HASH_DATA_I) && !is_number(node->son[0])) || 
+		  (ret == HASH_DATA_F && (node->son[0]->symbol->type != HASH_LIT_F && node->son[0]->symbol->datatype != HASH_DATA_F)))
+		{
+			fprintf(stderr, "Semantic ERROR: Invalid return type\n");
+			++SemanticErrors;
+		}
+	}
+
+	for (i=0; i<MAX_SONS; ++i)
+		check_return(node->son[i], ret);
 }
 void check_function_arguments(AST *node)
 {
@@ -211,17 +234,17 @@ void check_nature(AST *node)
 	}
 	
 	for (i=0; i<MAX_SONS; ++i)
-		check_vec(node->son[i], vsize, current, dtype);
+		check_nature(node->son[i]);
 }
 
 void check_semantic(AST *node)
 {
 	check_and_set_declarations(node);
 	check_undeclared();
-	// check_operands(node);
+	check_operands(node);
 	check_vec_index(node);
 	check_vec(node,0,0,0);
 	// check_nature(node);
-	// check_return(node);
+	check_return(node, 0);
 	// check_function_arguments(node);
 }

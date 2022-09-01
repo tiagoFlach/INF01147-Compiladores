@@ -31,11 +31,14 @@ enum hashData {
 	HASH_DATA_F
 };
 
+typedef struct ast_node AST;
+
 typedef struct hash_node
 {
 	int type;
 	int datatype;
 	char *text;
+	AST *dec;
 	struct hash_node *next;
 } HASH_NODE;
 
