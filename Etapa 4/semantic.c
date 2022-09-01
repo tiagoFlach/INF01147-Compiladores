@@ -20,44 +20,36 @@ void check_and_set_declarations(AST *node)
 
 	switch (node->type)
 	{
-		case AST_VAR:
+		case AST_DECVAR:
 			if (node->symbol)
 			{
-				if (node->symbol->type != SYMBOL_IDENTIFIER)
+				if (node->symbol->type != HASH_IDT)
 				{
 					fprintf(stderr, "Semantic ERROR: variable %s already declared\n", node->symbol->text);
 					++SemanticErrors;
 				}
-			} else {
-
+			node->symbol->type = HASH_VAR;
 			}
-			node->symbol->type = SYMBOL_VARIABLE;
 			break;
-		case AST_VECTOR:
+		case AST_DECVEC:
 			if (node->symbol)
 			{
-				if (node->symbol->type != SYMBOL_IDENTIFIER)
+				if (node->symbol->type != HASH_IDT)
 				{
 					fprintf(stderr, "Semantic ERROR: vector %s already declared\n", node->symbol->text);
 					++SemanticErrors;
 				}
-			} else {
-
-			}
-			node->symbol->type = SYMBOL_VECTOR;
+			node->symbol->type = HASH_VEC;}
 			break;
-		case ART_DEC:
+		case AST_DECFUN:
 			if (node->symbol)
 			{
-				if (node->symbol->type != SYMBOL_IDENTIFIER)
+				if (node->symbol->type != HASH_IDT)
 				{
 					fprintf(stderr, "Semantic ERROR: function %s already declared\n", node->symbol->text);
 					++SemanticErrors;
 				}
-			} else {
-
-			}
-			node->symbol->type = SYMBOL_FUNCTION;
+			node->symbol->type = HASH_FUN;}
 			break;
 	}
 

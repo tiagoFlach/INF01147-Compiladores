@@ -41,12 +41,12 @@ return					{ return KW_RETURN; }
 "=="					{ return OPERATOR_EQ;  }
 "!="					{ return OPERATOR_DIF; }
 
-{DIGIT}+				{ yylval.symbol = hashInsert(yytext, LIT_INTEGER); return LIT_INTEGER; }
-{DIGIT}","{DIGIT}		{ yylval.symbol = hashInsert(yytext, LIT_FLOAT);   return LIT_FLOAT;   }
-\'.\'					{ yylval.symbol = hashInsert(yytext, LIT_CHAR);    return LIT_CHAR;    }
-\"(\\.|[^\\"])*\"		{ yylval.symbol = hashInsert(yytext, LIT_STRING);  return LIT_STRING;  }
+{DIGIT}+				{ yylval.symbol = hashInsert(yytext, HASH_LIT_I); return LIT_INTEGER; }
+{DIGIT}","{DIGIT}		{ yylval.symbol = hashInsert(yytext, HASH_LIT_F); return LIT_FLOAT;   }
+\'.\'					{ yylval.symbol = hashInsert(yytext, HASH_LIT_C); return LIT_CHAR;    }
+\"(\\.|[^\\"])*\"		{ yylval.symbol = hashInsert(yytext, HASH_LIT_S); return LIT_STRING;  }
 
-[a-zA-Z_]*				{ yylval.symbol = hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
+[a-zA-Z_]*				{ yylval.symbol = hashInsert(yytext, HASH_IDT); return TK_IDENTIFIER; }
 
 [;()\[\]{}+-./<>&|~]	{ return yytext[0]; }
 

@@ -12,6 +12,18 @@
 
 #define HASH_SIZE 997
 
+enum hashConst {
+	HASH_IDT,
+	HASH_VAR,
+	HASH_VEC,
+	HASH_FUN,
+
+	HASH_LIT_I,
+	HASH_LIT_C,
+	HASH_LIT_F,
+	HASH_LIT_S
+};
+
 typedef struct hash_node
 {
 	int type;

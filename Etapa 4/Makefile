@@ -13,14 +13,15 @@ HASH=hash
 AST=ast
 LEX=lex.yy
 YAC=parser.tab
+SEM=semantic
 
 FLAGS=-d
 ifeq ($(TEST),1)
 FLAGS+= -Wcounterexamples
 endif
 
-$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) $(AST)
-			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o $(AST).o
+$(OUT):		$(YAC) $(LEX) $(MAIN) $(HASH) $(AST) $(SEM)
+			gcc -o $(OUT) $(YAC).o $(LEX).o $(MAIN).o $(HASH).o $(AST).o $(SEM).o
 %:			%.c
 			gcc -c $@.c
 $(LEX).c: 	scanner.l

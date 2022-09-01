@@ -27,7 +27,9 @@ char * nodeType[AST_PROGRAM+1] = {
 	"AST_EQU", 
 	"AST_DIF", 
 	"AST_ASSIGN",
-    "AST_DEC", 
+    "AST_DECVAR",
+    "AST_DECVEC",
+    "AST_DECFUN",
 	"AST_CMD", 
 	"AST_LCMD", 
 	"AST_LCMDT", 
@@ -47,7 +49,6 @@ char * nodeType[AST_PROGRAM+1] = {
 	"AST_FLOAT", 
 	"AST_INT", 
 	"AST_INTV", 
-	"AST_LFTOP", 
 	"AST_EXPL", 
 	"AST_ARGL", 
 	"AST_DECL", 
@@ -161,29 +162,39 @@ void astDecompile(AST *node)
 			fprintf(out, " <- ");
 			astDecompile(node->son[1]);
 			break;
-		case AST_DEC:
+		case AST_DECVAR:
 			astDecompile(node->son[0]);
-			if(node->son[1] && node->son[1]->type == AST_INTV)
+			fprintf(out,"%s(",node->symbol->text);
+			astDecompile(node->son[1]);
+			fprintf(out,")");
+			fprintf(out,";\n");
+			break;
+		case AST_DECVEC:
+			astDecompile(node->son[0]);
+			fprintf(out,"%s",node->symbol->text);
+			if(node->son[2] && node->son[2]->type == AST_INTV)
 			{
-				fprintf(out,"[%s] ",node->son[0]->son[0]->symbol->text);
-				astDecompile(node->son[1]);
+				fprintf(out,"[%s] ",node->son[1]->symbol->text);
+				astDecompile(node->son[2]);
 				break;
 			}
-			else if (node->son[1])
+			fprintf(out,"[%s]",node->son[1]->symbol->text);
+			fprintf(out,";\n");
+			break;
+		case AST_DECFUN:
+			astDecompile(node->son[0]);
+			fprintf(out,"%s",node->symbol->text);
+			if (node->son[1])
 			{
 				fprintf(out,"(");
 				astDecompile(node->son[1]);
 				fprintf(out,")");
 			}
-			else if (!node->son[2])
-				fprintf(out,"[%s]",node->son[0]->son[0]->symbol->text);
-			else if (!node->son[1])
+			else
 				fprintf(out,"()");
 				
 			if(node->son[2])
 				astDecompile(node->son[2]);
-			else
-				fprintf(out,";\n");
 			break;
 		case AST_LCMD:
 			astDecompile(node->son[0]);
@@ -258,10 +269,6 @@ void astDecompile(AST *node)
 			if(node->son[1]) { fprintf(out, " "); astDecompile(node->son[1]); }
 			else fprintf(out, ";\n");
 			break;
-		case AST_LFTOP:
-			astDecompile(node->son[0]);
-			fprintf(out,"%s",node->symbol->text);
-			break;
 		case AST_EXPL:
 			astDecompile(node->son[0]);
 			if(node->son[1])
@@ -271,8 +278,16 @@ void astDecompile(AST *node)
 			}
 			break;
 		case AST_MSGL:
+			astDecompile(node->son[0]);
+			if(node->son[1])
+			{
+				fprintf(out," ");
+				astDecompile(node->son[1]);
+			}
+			break;
 		case AST_ARGL:
 			astDecompile(node->son[0]);
+			fprintf(out,"%s",node->symbol->text);
 			if(node->son[1])
 			{
 				fprintf(out," ");

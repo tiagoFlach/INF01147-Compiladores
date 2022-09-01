@@ -34,7 +34,9 @@ enum astConst {
     AST_DIF,
     AST_ASSIGN,
 	// Commands
-    AST_DEC,
+    AST_DECVAR,
+    AST_DECVEC,
+    AST_DECFUN,
     AST_CMD,
     AST_LCMD,
     AST_LCMDT,
@@ -60,7 +62,6 @@ enum astConst {
     AST_INT,
 	// Initialization
     AST_INTV,
-    AST_LFTOP,
 	// Lists
     AST_EXPL,
     AST_ARGL,

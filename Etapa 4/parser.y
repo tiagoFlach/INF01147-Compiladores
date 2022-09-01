@@ -10,6 +10,7 @@
 	*/
 	#include "hash.h"
 	#include "ast.h"
+        #include "semantic.h"
 
 	int yylex(void); 
 	int yyerror(const char* s);
@@ -53,7 +54,6 @@
 
 
 /* Types */
-%type<ast> program
 %type<ast> dec
 %type<ast> blck
 %type<ast> argl
@@ -66,12 +66,12 @@
 
 %type<ast> expr
 %type<ast> lit
+%type<ast> vsize
 %type<ast> kw_t
 %type<ast> var
 %type<ast> initv
 
 %type<ast> msg
-%type<ast> lftop
 %type<ast> cmd
 
 
@@ -90,20 +90,23 @@
 
 %%
 
-program: decl		                        { $$ = $1; ASTroot = $$; astPrint($$,0); }
+program: decl		                        { 
+                                                        ASTroot = $1; 
+                                                        astPrint($1,0); 
+                                                        check_and_set_declarations($1); 
+                                                }
         ;
 
 decl:   dec decl                                { $$ = astCreate(AST_DECL,0,$1,$2,0,0); }
         |			                { $$ = 0; }
         ;
 
-dec:    lftop '(' lit ')' ';'                   { $$ = astCreate(AST_DEC,0,$1,$3,0,0); }
-        | lftop '(' argl ')' blck               { $$ = astCreate(AST_DEC,0,$1,$3,$5,0); }
-        | lftop '[' LIT_INTEGER ']' initv       { $1->son[0]->symbol = $3; $$ = astCreate(AST_DEC,0,$1,$5,0,0); }
+dec:    kw_t TK_IDENTIFIER '(' lit ')' ';'       { $$ = astCreate(AST_DECVAR,$2,$1,$4,0,0); }
+        | kw_t TK_IDENTIFIER '(' argl ')' blck   { $$ = astCreate(AST_DECFUN,$2,$1,$4,$6,0); }
+        | kw_t TK_IDENTIFIER '[' vsize ']' initv { $$ = astCreate(AST_DECVEC,$2,$1,$4,$6,0); }
         ;
 
-/* Left operator */
-lftop:  kw_t TK_IDENTIFIER                      { $$ = astCreate(AST_LFTOP,$2,$1,0,0,0);  }
+vsize:  LIT_INTEGER                             { $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
         ;
 
 /* Type */
@@ -124,7 +127,7 @@ initv:  lit initv                               { $$ = astCreate(AST_INTV,0,$1,$
         ;
 
 /* Argument list */
-argl:   lftop argl                              { $$ = astCreate(AST_ARGL,0,$1,$2,0,0); }
+argl:   kw_t TK_IDENTIFIER argl                 { $$ = astCreate(AST_ARGL,$2,$1,$3,0,0); }
         |					{ $$ = 0; }
         ;
 
