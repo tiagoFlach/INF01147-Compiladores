@@ -159,11 +159,15 @@ void check_vec_index(AST *node)
 		int decsize = atoi(node->symbol->dec->son[1]->symbol->text);
 		int indsize, isInteger = 0;
 		if(node->son[0]->symbol->type == HASH_LIT_I) { isInteger = 1; indsize = atoi(node->son[0]->symbol->text); }
-		if(!is_number(node->son[0]) || (isInteger && (indsize >= decsize)))
+		if(!is_number(node->son[0]))
 		{
-			fprintf(stderr, "Semantic ERROR: Invalid vector index\n");
+			fprintf(stderr, "Semantic ERROR: Invalid index datatype\n");
 			++SemanticErrors;
 		} 
+		else if(isInteger && (indsize >= decsize)){
+			fprintf(stderr, "Semantic ERROR: Index out of range\n");
+			++SemanticErrors;
+		}
 	}
 
 	for (i=0; i<MAX_SONS; ++i)
@@ -231,7 +235,7 @@ void check_function_arguments(AST *node)
 	if (node == 0)
 		return;
 
-	if(node->type == AST_CALL)
+	if(node->type == AST_CALL && node->symbol->type == HASH_FUN)
 	{
 		AST* darg = node->symbol->dec->son[1];
 		AST* carg = node->son[0];
@@ -272,8 +276,27 @@ void check_nature(AST *node)
 
 	switch (node->type)
 	{
-		case AST_VECTOR: break;
-		case AST_VAR: break;
+		case AST_VECTOR:
+			if((!node->son[0] || (node->symbol->type != HASH_VEC)) && node->symbol->type != HASH_IDT) 
+			{
+				fprintf(stderr, "Semantic ERROR: This object cannot be indexed\n");
+				++SemanticErrors;
+			}
+			break;
+		case AST_VAR: 
+			if((node->son[0] || (node->symbol->type != HASH_VAR)) && node->symbol->type != HASH_IDT) 
+			{
+				fprintf(stderr, "Semantic ERROR: This object is not a variable\n");
+				++SemanticErrors;
+			}
+			break;
+		case AST_CALL: 
+			if((node->symbol->type != HASH_FUN) && node->symbol->type != HASH_IDT) 
+			{
+				fprintf(stderr, "Semantic ERROR: This object is uncallable\n");
+				++SemanticErrors;
+			}
+			break;
 		
 		default:
 			break;
@@ -285,12 +308,12 @@ void check_nature(AST *node)
 
 void check_semantic(AST *node)
 {
-	check_and_set_declarations(node);
-	check_undeclared();
-	check_operands(node);
-	check_vec_index(node);
-	check_vec(node,0,0,0);
-	// check_nature(node);
-	check_return(node, 0);
-	check_function_arguments(node);
+	check_and_set_declarations(node); // acho que safe
+	check_undeclared(); // acho que safe
+	check_operands(node); // TESTAR
+	check_vec_index(node); // acho que safe
+	check_vec(node,0,0,0); // testar
+	check_nature(node); // lado esq e dir?
+	check_return(node, 0); // testar
+	check_function_arguments(node); // testar
 }
