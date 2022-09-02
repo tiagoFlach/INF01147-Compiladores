@@ -9,6 +9,7 @@
 
 #include "semantic.h"
 #include <stdlib.h>
+#include <string.h>
 
 int SemanticErrors = 0;
 
@@ -34,6 +35,52 @@ int is_number(AST *node)
 			(node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C))) ||
 			(node->type == AST_CALL && (node->symbol->datatype == HASH_DATA_I || node->symbol->datatype == HASH_DATA_C)));
 }
+
+int is_float(AST *node)
+{
+	return 	(node->type == AST_SYMBOL && node->symbol->type == HASH_LIT_F) || 
+			(node->symbol->type == HASH_VAR && node->symbol->datatype == HASH_DATA_F) ||
+			(node->type == AST_CALL && node->symbol->datatype == HASH_DATA_F);
+}
+
+int is_bool(AST *node)
+{
+	return 	(node->type == AST_AND || node->type == AST_OR || node->type == AST_EQU || 
+	   		 node->type == AST_DIF || node->type == AST_GTR || node->type == AST_LSR || 
+	   		 node->type == AST_NOT || node->type == AST_LSE || node->type == AST_GTE);
+}
+
+int check_expr(AST *node, const char *expType)
+{
+	if(is_bool(node))
+	{
+		if(node->son[0] && node->son[1])
+		{
+			if(check_expr(node->son[0], expType) && check_expr(node->son[1], expType)) return 1;
+			else if(!is_number(node->son[0]) && !is_float(node->son[0]))
+					{
+						fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", expType);
+						++SemanticErrors;
+						return 0;
+					}
+			else if(!is_number(node->son[1]) && !is_float(node->son[1]))
+					{
+						fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", expType);
+						++SemanticErrors;
+						return 0;
+					}
+			else if((is_number(node->son[0]) != is_number(node->son[1])) &&
+			   		(is_float(node->son[0]) != is_float(node->son[1])))
+					{
+						fprintf(stderr, "Semantic ERROR: Operand types do not match for %s\n", expType);
+						++SemanticErrors;
+						return 0;
+					}
+			else return 1;
+		}
+	}
+	return 0;
+}	
 
 void check_and_set_declarations(AST *node)
 {
@@ -112,39 +159,23 @@ void check_operands(AST *node)
 
 	switch (node->type)
 	{
-		case AST_ADD: stringType = "ADD"; break;
-		case AST_SUB: stringType = "SUB"; break;
-		case AST_DIV: stringType = "DIV"; break;
-		case AST_MUL: stringType = "MUL"; break;
-		case AST_LSR: stringType = "LSR"; break;
-		case AST_GTR: stringType = "GTR"; break;
-		case AST_LSE: stringType = "LSE"; break;
-		case AST_GTE: stringType = "GTE"; break;
-		case AST_EQU: stringType = "EQU"; break;
-		case AST_DIF: stringType = "DIF"; break;
+		case AST_ADD: strcpy(stringType,"ADD"); break;
+		case AST_AND: strcpy(stringType,"AND"); break;
+		case AST_NOT: strcpy(stringType,"NOT"); break;
+		case AST_OR:  strcpy(stringType,"OR");  break;
+		case AST_SUB: strcpy(stringType,"SUB"); break;
+		case AST_DIV: strcpy(stringType,"DIV"); break;
+		case AST_MUL: strcpy(stringType,"MUL"); break;
+		case AST_LSR: strcpy(stringType,"LSR"); break;
+		case AST_GTR: strcpy(stringType,"GTR"); break;
+		case AST_LSE: strcpy(stringType,"LSE"); break;
+		case AST_GTE: strcpy(stringType,"GTE"); break;
+		case AST_EQU: strcpy(stringType,"EQU"); break;
+		case AST_DIF: strcpy(stringType,"DIF"); break;
 	}
-	if((node->type < AST_AND) || ((node->type > AST_NOT) && (node->type < AST_ASSIGN)))
-		if(node->son[0] && node->son[0]->symbol)
-		{
-			int firstFloat = (node->son[0]->symbol->datatype == HASH_DATA_F || node->son[0]->symbol->type == HASH_LIT_F);
-			if(!is_number(node->son[0]))
-			{
-				fprintf(stderr, "Semantic ERROR: Invalid left operand for %s\n", stringType);
-				++SemanticErrors;
-			}
-			if(node->son[1] && node->son[1]->symbol)
-			{
-				int secondFloat = (node->son[1]->symbol->datatype == HASH_DATA_F || node->son[1]->symbol->type == HASH_LIT_F);
-				if(!is_number(node->son[1]) || (firstFloat != secondFloat))
-				{
-					fprintf(stderr, "Semantic ERROR: Invalid right operand for %s\n", stringType);
-					++SemanticErrors;
-				}
-			}
-		} 
-
-	for (i=0; i<MAX_SONS; ++i)
-		check_operands(node->son[i]);
+	if(!check_expr(node, stringType));
+		for (i=0; i<MAX_SONS; ++i)
+			check_operands(node->son[i]);
 }
 
 void check_vec_index(AST *node)
@@ -192,7 +223,7 @@ void check_vec(AST *node, int vsize, int current, int dtype)
 	{
 		++current;
 		if((dtype == HASH_DATA_F && node->son[0]->symbol->type != HASH_LIT_F) ||
-		   (current > vsize) || node->son[0]->symbol->type == HASH_LIT_S)
+		   (current > vsize) || node->son[0]->symbol->type == HASH_LIT_S || is_bool(node))
 		{
 			fprintf(stderr, "Semantic ERROR: Invalid vector initialization\n");
 			++SemanticErrors;
@@ -210,14 +241,15 @@ void check_return(AST *node, int ret)
 	if (node == 0)
 		return;
 
-	if(node->type == AST_DECFUN) 
+	if(node->type == AST_DECFUN)
 		ret = node->symbol->datatype;
 	
 	if(node->type == AST_RETURN)
 	{	
 		if(!node->son[0] || (node->son[0]->symbol && ((node->son[0]->symbol->type == HASH_UNKNOW && (node->son[0]->symbol->datatype != ret)) ||
 		  ((ret == HASH_DATA_C || ret == HASH_DATA_I) && !is_number(node->son[0])) || 
-		  (ret == HASH_DATA_F && (node->son[0]->symbol->type != HASH_LIT_F && node->son[0]->symbol->datatype != HASH_DATA_F)))))
+		  (ret == HASH_DATA_F && (node->son[0]->symbol->type != HASH_LIT_F && node->son[0]->symbol->datatype != HASH_DATA_F)))) || 
+		  is_bool(node->son[0]))
 		{
 			fprintf(stderr, "Semantic ERROR: Invalid return type\n");
 			++SemanticErrors;
@@ -297,9 +329,6 @@ void check_nature(AST *node)
 				++SemanticErrors;
 			}
 			break;
-		
-		default:
-			break;
 	}
 	
 	for (i=0; i<MAX_SONS; ++i)
@@ -308,12 +337,12 @@ void check_nature(AST *node)
 
 void check_semantic(AST *node)
 {
-	check_and_set_declarations(node); // acho que safe
-	check_undeclared(); // acho que safe
-	check_operands(node); // TESTAR
-	check_vec_index(node); // acho que safe
-	check_vec(node,0,0,0); // testar
-	check_nature(node); // lado esq e dir?
-	check_return(node, 0); // testar
-	check_function_arguments(node); // testar
+	check_and_set_declarations(node);
+	check_undeclared();
+	check_operands(node);
+	check_vec_index(node);
+	check_vec(node,0,0,0);
+	check_nature(node);
+	check_return(node, 0);
+	check_function_arguments(node);
 }
