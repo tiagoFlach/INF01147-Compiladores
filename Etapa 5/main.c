@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 	
 	astDecompile(ASTroot);
 	check_semantic(ASTroot);
+	tacPrintBackwards(generateCode(ASTroot));
 
 	hashPrint();
 	astPrint(ASTroot, 0);

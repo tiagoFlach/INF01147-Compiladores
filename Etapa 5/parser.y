@@ -1,4 +1,3 @@
-
 %{
 	/*
 	* 
@@ -10,7 +9,7 @@
 	*/
 	#include "hash.h"
 	#include "ast.h"
-        #include "semantic.h"
+	#include "semantic.h"
 
 	int yylex(void); 
 	int yyerror(const char* s);
@@ -90,19 +89,19 @@
 
 %%
 
-program: decl		                        { ASTroot = $1; }
+program: decl					{ ASTroot = $1; }
         ;
 
-decl:   dec decl                                { $$ = astCreate(AST_DECL,0,$1,$2,0,0); }
-        |			                { $$ = 0; }
+decl:   dec decl				{ $$ = astCreate(AST_DECL,0,$1,$2,0,0); }
+        |						{ $$ = 0; }
         ;
 
-dec:    kw_t TK_IDENTIFIER '(' lit ')' ';'       { $$ = astCreate(AST_DECVAR,$2,$1,$4,0,0); }
-        | kw_t TK_IDENTIFIER '(' argl ')' blck   { $$ = astCreate(AST_DECFUN,$2,$1,$4,$6,0); }
-        | kw_t TK_IDENTIFIER '[' vsize ']' initv { $$ = astCreate(AST_DECVEC,$2,$1,$4,$6,0); }
+dec:    kw_t TK_IDENTIFIER '(' lit ')' ';'			{ $$ = astCreate(AST_DECVAR,$2,$1,$4,0,0); }
+        | kw_t TK_IDENTIFIER '(' argl ')' blck		{ $$ = astCreate(AST_DECFUN,$2,$1,$4,$6,0); }
+        | kw_t TK_IDENTIFIER '[' vsize ']' initv	{ $$ = astCreate(AST_DECVEC,$2,$1,$4,$6,0); }
         ;
 
-vsize:  LIT_INTEGER                             { $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
+vsize:  LIT_INTEGER				{ $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
         ;
 
 /* Type */
@@ -114,48 +113,48 @@ kw_t:   KW_CHAR   				{ $$ = astCreate(AST_CHAR,0,0,0,0,0);  }
 /* Literal */
 lit:    LIT_CHAR				{ $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
         | LIT_FLOAT				{ $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
-        | LIT_INTEGER			        { $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
+        | LIT_INTEGER			{ $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
         ;
 
 /* Init vector */
-initv:  lit initv                               { $$ = astCreate(AST_INTV,0,$1,$2,0,0); }
-        | ';'                                   { $$ = 0; }
+initv:  lit initv				{ $$ = astCreate(AST_INTV,0,$1,$2,0,0); }
+        | ';'					{ $$ = 0; }
         ;
 
 /* Argument list */
-argl:   kw_t TK_IDENTIFIER argl                 { $$ = astCreate(AST_ARGL,$2,$1,$3,0,0); }
-        |					{ $$ = 0; }
+argl:   kw_t TK_IDENTIFIER argl	{ $$ = astCreate(AST_ARGL,$2,$1,$3,0,0); }
+        |						{ $$ = 0; }
         ;
 
-cmd:    blck 					{ $$ = $1; }
+cmd:    blck									{ $$ = $1; }
         | var ASSIGNMENT expr                   { $$ = astCreate(AST_ASSIGN,0,$1,$3,0,0);   }
-        | KW_IF '(' expr ')' cmd %prec IFX	{ $$ = astCreate(AST_IF,0,$3,$5,0,0);       }
+        | KW_IF '(' expr ')' cmd %prec IFX		{ $$ = astCreate(AST_IF,0,$3,$5,0,0);       }
         | KW_IF '(' expr ')' cmd KW_ELSE cmd	{ $$ = astCreate(AST_IF_ELSE,0,$3,$5,$7,0); }
-        | KW_WHILE '(' expr ')' cmd 		{ $$ = astCreate(AST_WHILE,0,$3,$5,0,0);    }
-        | KW_READ var				{ $$ = astCreate(AST_READ,0,$2,0,0,0);      }
-        | KW_PRINT msgl				{ $$ = astCreate(AST_PRINT,0,$2,0,0,0);     }
-        | KW_RETURN expr			{ $$ = astCreate(AST_RETURN,0,$2,0,0,0);    }
-        |					{ $$ = 0; }
+        | KW_WHILE '(' expr ')' cmd				{ $$ = astCreate(AST_WHILE,0,$3,$5,0,0);    }
+        | KW_READ var							{ $$ = astCreate(AST_READ,0,$2,0,0,0);      }
+        | KW_PRINT msgl							{ $$ = astCreate(AST_PRINT,0,$2,0,0,0);     }
+        | KW_RETURN expr						{ $$ = astCreate(AST_RETURN,0,$2,0,0,0);    }
+        |										{ $$ = 0; }
         ;
 
 /* Message list */
-msgl:   msg msgl                                { $$ = astCreate(AST_MSGL,0,$1,$2,0,0); }
+msgl:   msg msgl                { $$ = astCreate(AST_MSGL,0,$1,$2,0,0); }
         |				        { $$ = 0; }
         ;
 
-msg:    LIT_STRING                              { $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
-        | expr                                  { $$ = $1; }
+msg:    LIT_STRING				{ $$ = astCreate(AST_SYMBOL,$1,0,0,0,0); }
+        | expr					{ $$ = $1; }
         ;
 
-blck:   '{' lcmd '}'				{ $$ = astCreate(AST_BLCK,0,$2,0,0,0); }
+blck:   '{' lcmd '}'			{ $$ = astCreate(AST_BLCK,0,$2,0,0,0); }
         ;
 
-lcmd:   cmd lcmdt                               { $$ = astCreate(AST_LCMD,0,$1,$2,0,0); }
+lcmd:   cmd lcmdt				{ $$ = astCreate(AST_LCMD,0,$1,$2,0,0); }
         ;
 
 /* List command tail */
-lcmdt: ';' cmd lcmdt 				{ $$ = astCreate(AST_LCMDT,0,$2,$3,0,0); }
-        |                                       { $$ = 0; }
+lcmdt: ';' cmd lcmdt 			{ $$ = astCreate(AST_LCMDT,0,$2,$3,0,0); }
+        |						{ $$ = 0; }
         ;
 
 var:    TK_IDENTIFIER                           { $$ = astCreate(AST_VAR,$1,0,0,0,0);     }
