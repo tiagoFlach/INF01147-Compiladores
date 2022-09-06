@@ -49,3 +49,4 @@ HASH_NODE *hashInsert(char *text, int type);
 void hashPrint(void);
 void hashPrintByType(int type);
 int hashCheckUndeclared();
+HASH_NODE* makeTemp(void);

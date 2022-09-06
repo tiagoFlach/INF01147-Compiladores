@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "tacs.h"
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
@@ -16,6 +17,7 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
+	if (tac->type = TAC_SYMBOL) return;
 	fprintf(stderr, "TAC(");
 
 	switch(tac->type)
@@ -23,6 +25,7 @@ void tacPrint(TAC* tac)
 		case TAC_SYMBOL: fprintf(stderr, "TAC_SYMBOL"); break;
 		case TAC_ADD: fprintf(stderr, "TAC_ADD"); break;
 		case TAC_SUB: fprintf(stderr, "TAC_SUB"); break;
+		case TAC_COPY: fprintf(stderr, "TAC_COPY"); break;
 		default: fprintf(stderr, "TAC_UNKNOWN"); break;
 	}
 
@@ -34,7 +37,7 @@ void tacPrint(TAC* tac)
 void tacPrintBackwards(TAC* tac)
 {
 	if (!tac)
-		return
+		return;
 	else
 	{
 		tacPrintBackwards(tac->prev);
@@ -42,6 +45,20 @@ void tacPrintBackwards(TAC* tac)
 	}
 }
 
+TAC* tacJoin(TAC* l1, TAC* l2)
+{
+	TAC *point;
+
+	if (!l1) return l2;
+	if (!l2) return l1;
+
+	for (point = l2; point->prev != 0; point = point->prev);
+
+	point->prev = l1;
+	return l2;
+}
+
+// CODE GENERATE
 TAC* generateCode(AST *node)
 {
 	int i;
@@ -57,7 +74,16 @@ TAC* generateCode(AST *node)
 	// This node
 	switch(node->type)
 	{
-
+		case AST_SYMBOL: result = tacCreate(TAC_SYMBOL, node->symbol,0,0); break;
+		case AST_ADD: 
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_ADD, makeTemp(), code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_ASSIGN:
+			result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0,0));
+			break;
+		default: result = tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], code[3])));
+		break;
 	}
 
 	return result;

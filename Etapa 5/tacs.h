@@ -8,6 +8,7 @@ enum tacSymbol {
 	TAC_SYMBOL,
 	TAC_ADD,
 	TAC_SUB,
+	TAC_COPY,
 };
 
 typedef struct tac_node
@@ -24,6 +25,7 @@ typedef struct tac_node
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2);
 void tacPrint(TAC* tac);
 void tacPrintBackwards(TAC* tac);
+TAC* tacJoin(TAC* l1, TAC* l2);
 
 TAC* generateCode(AST *node);
 

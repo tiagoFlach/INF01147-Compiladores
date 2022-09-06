@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "semantic.h"
+#include "tacs.h"
 #include "lex.yy.h"
 
 extern int yyparse();
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
 	// Falta do arquivo de entrada
 	if (argc < 3)
 	{
-		printf("Call: ./etapa3 input.txt output.txt\n");
+		printf("Call: ./etapa5 input.txt output.txt\n");
 		exit(1);
 	}
 

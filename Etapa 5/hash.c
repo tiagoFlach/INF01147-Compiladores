@@ -93,3 +93,12 @@ int hashCheckUndeclared()
 			}
 	return undeclared;
 }
+
+HASH_NODE* makeTemp(void)
+{
+	static int serial = 0;
+	char buffer[256] = "";
+
+	sprintf(buffer, "mYWeeirT_emp%d", serial++);
+	return hashInsert(buffer, HASH_VAR);
+}
