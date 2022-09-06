@@ -21,7 +21,9 @@ enum hashSymbol {
 	HASH_LIT_I,
 	HASH_LIT_C,
 	HASH_LIT_F,
-	HASH_LIT_S
+	HASH_LIT_S,
+
+	HASH_LABEL
 };
 
 enum hashData {
@@ -50,3 +52,4 @@ void hashPrint(void);
 void hashPrintByType(int type);
 int hashCheckUndeclared();
 HASH_NODE* makeTemp(void);
+HASH_NODE* makeLabel(void);

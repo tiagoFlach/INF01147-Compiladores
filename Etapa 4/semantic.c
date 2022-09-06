@@ -152,7 +152,7 @@ void check_undeclared() { SemanticErrors += hashCheckUndeclared(); }
 void check_operands(AST *node)
 {
 	int i;
-	char *stringType;
+	char stringType[5];
 
 	if (node == 0)
 		return;

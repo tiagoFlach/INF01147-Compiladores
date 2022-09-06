@@ -6,9 +6,21 @@
 
 enum tacSymbol {
 	TAC_SYMBOL,
+	TAC_MOVE,
 	TAC_ADD,
 	TAC_SUB,
+	TAC_MUL,
+	TAC_LABEL,
+	TAC_ENDFUN,
+	TAC_IFZ,
+	TAC_JUMP,
+	TAC_CALL,
+	TAC_ARG,
+	TAC_RET,
+	TAC_PRINT,
+	TAC_READ,
 	TAC_COPY,
+	TAC_JFALSE,
 };
 
 typedef struct tac_node
