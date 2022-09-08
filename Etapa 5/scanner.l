@@ -28,7 +28,7 @@ char					{ return KW_CHAR;  }
 int						{ return KW_INT;   }
 float					{ return KW_FLOAT; }
 
-if 						{ return KW_IF;     }
+if 						{ return KW_IF;	 }
 else					{ return KW_ELSE;   }
 while					{ return KW_WHILE;  }
 read					{ return KW_READ;   }
@@ -43,7 +43,7 @@ return					{ return KW_RETURN; }
 
 {DIGIT}+				{ yylval.symbol = hashInsert(yytext, HASH_LIT_I); return LIT_INTEGER; }
 {DIGIT}","{DIGIT}		{ yylval.symbol = hashInsert(yytext, HASH_LIT_F); return LIT_FLOAT;   }
-\'.\'					{ yylval.symbol = hashInsert(yytext, HASH_LIT_C); return LIT_CHAR;    }
+\'.\'					{ yylval.symbol = hashInsert(yytext, HASH_LIT_C); return LIT_CHAR;	}
 \"(\\.|[^\\"])*\"		{ yylval.symbol = hashInsert(yytext, HASH_LIT_S); return LIT_STRING;  }
 
 [a-zA-Z_]*				{ yylval.symbol = hashInsert(yytext, HASH_IDT); return TK_IDENTIFIER; }

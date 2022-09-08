@@ -166,8 +166,8 @@ print_list:
 	;
 
 parameter_list: expr parameter_list
-    | expr
-    ;
+	| expr
+	;
 
 literal:
 	LIT_INTEGER

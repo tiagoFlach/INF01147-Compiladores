@@ -50,30 +50,30 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    KW_CHAR = 258,                 /* KW_CHAR  */
-    KW_INT = 259,                  /* KW_INT  */
-    KW_FLOAT = 260,                /* KW_FLOAT  */
-    KW_IF = 261,                   /* KW_IF  */
-    KW_ELSE = 262,                 /* KW_ELSE  */
-    KW_WHILE = 263,                /* KW_WHILE  */
-    KW_READ = 264,                 /* KW_READ  */
-    KW_PRINT = 265,                /* KW_PRINT  */
-    KW_RETURN = 266,               /* KW_RETURN  */
-    ASSIGNMENT = 267,              /* ASSIGNMENT  */
-    OPERATOR_LE = 268,             /* OPERATOR_LE  */
-    OPERATOR_GE = 269,             /* OPERATOR_GE  */
-    OPERATOR_EQ = 270,             /* OPERATOR_EQ  */
-    OPERATOR_DIF = 271,            /* OPERATOR_DIF  */
-    TK_IDENTIFIER = 272,           /* TK_IDENTIFIER  */
-    LIT_INTEGER = 273,             /* LIT_INTEGER  */
-    LIT_FLOAT = 274,               /* LIT_FLOAT  */
-    LIT_CHAR = 275,                /* LIT_CHAR  */
-    LIT_STRING = 276,              /* LIT_STRING  */
-    TOKEN_ERROR = 277              /* TOKEN_ERROR  */
+	YYEMPTY = -2,
+	YYEOF = 0,					 /* "end of file"  */
+	YYerror = 256,				 /* error  */
+	YYUNDEF = 257,				 /* "invalid token"  */
+	KW_CHAR = 258,				 /* KW_CHAR  */
+	KW_INT = 259,				  /* KW_INT  */
+	KW_FLOAT = 260,				/* KW_FLOAT  */
+	KW_IF = 261,				   /* KW_IF  */
+	KW_ELSE = 262,				 /* KW_ELSE  */
+	KW_WHILE = 263,				/* KW_WHILE  */
+	KW_READ = 264,				 /* KW_READ  */
+	KW_PRINT = 265,				/* KW_PRINT  */
+	KW_RETURN = 266,			   /* KW_RETURN  */
+	ASSIGNMENT = 267,			  /* ASSIGNMENT  */
+	OPERATOR_LE = 268,			 /* OPERATOR_LE  */
+	OPERATOR_GE = 269,			 /* OPERATOR_GE  */
+	OPERATOR_EQ = 270,			 /* OPERATOR_EQ  */
+	OPERATOR_DIF = 271,			/* OPERATOR_DIF  */
+	TK_IDENTIFIER = 272,		   /* TK_IDENTIFIER  */
+	LIT_INTEGER = 273,			 /* LIT_INTEGER  */
+	LIT_FLOAT = 274,			   /* LIT_FLOAT  */
+	LIT_CHAR = 275,				/* LIT_CHAR  */
+	LIT_STRING = 276,			  /* LIT_STRING  */
+	TOKEN_ERROR = 277			  /* TOKEN_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

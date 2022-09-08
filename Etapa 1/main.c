@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 			case TOKEN_ERROR: 
 				printf("Unexpected token in line %d: %d . %c\n", getLineNumber(), token, yytext[0]);
 				break;
-            default: 
+			default: 
 				printf("Especial character '%c' in line %d\n", yytext[0], getLineNumber()); 
 				break;
 		}

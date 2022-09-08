@@ -1,3 +1,12 @@
+/*
+ * 
+ * UFRGS - Compiladores B - Marcelo Johann - 2022/1
+ * 
+ * Arthur Prochnow Baumgardt <apbaumgardt@inf.ufrgs.br>
+ * Tiago Lucas Flach <tlflach@inf.ufrgs.br>
+ * 
+ */
+
 #include <stdlib.h>
 #include "tacs.h"
 

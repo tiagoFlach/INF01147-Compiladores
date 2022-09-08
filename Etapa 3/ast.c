@@ -12,29 +12,29 @@
 extern FILE *out;
 
 char * nodeType[AST_PROGRAM+1] = {
-    "AST_SYMBOL", "AST_ADD", "AST_SUB", "AST_DIV", "AST_MUL", "AST_LSR", "AST_GTR", "AST_AND", "AST_OR", "AST_NOT", "AST_LSE", "AST_GTE", "AST_EQU", "AST_DIF", "AST_ASSIGN",
-    "AST_DEC", "AST_CMD", "AST_LCMD", "AST_LCMDT", "AST_VAR", "AST_VECTOR", "AST_MSG", "AST_MSGL", "AST_IF", "AST_IF_ELSE", "AST_WHILE", "AST_READ", "AST_PRINT", "AST_EXPN",
+	"AST_SYMBOL", "AST_ADD", "AST_SUB", "AST_DIV", "AST_MUL", "AST_LSR", "AST_GTR", "AST_AND", "AST_OR", "AST_NOT", "AST_LSE", "AST_GTE", "AST_EQU", "AST_DIF", "AST_ASSIGN",
+	"AST_DEC", "AST_CMD", "AST_LCMD", "AST_LCMDT", "AST_VAR", "AST_VECTOR", "AST_MSG", "AST_MSGL", "AST_IF", "AST_IF_ELSE", "AST_WHILE", "AST_READ", "AST_PRINT", "AST_EXPN",
 	"AST_RETURN", "AST_CALL", "AST_CHAR", "AST_FLOAT", "AST_INT", "AST_INTV", "AST_LFTOP", "AST_EXPL", "AST_ARGL", "AST_DECL", "AST_BLCK", "AST_PROGRAM"
 };
 
 AST* astCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3)
 {
-    AST* newNode;
-    newNode = (AST*) calloc(1, sizeof(AST));
-    newNode->type = type;
-    newNode->symbol = symbol;
-    newNode->son[0] = s0;
-    newNode->son[1] = s1;
-    newNode->son[2] = s2;
-    newNode->son[3] = s3;
-    return newNode;
+	AST* newNode;
+	newNode = (AST*) calloc(1, sizeof(AST));
+	newNode->type = type;
+	newNode->symbol = symbol;
+	newNode->son[0] = s0;
+	newNode->son[1] = s1;
+	newNode->son[2] = s2;
+	newNode->son[3] = s3;
+	return newNode;
 }
 
 void astPrint(AST* node, int level)
 {
-    if(!node) return;
-    for(int i = 0; i < level; i++) fprintf(stderr, "::");
-    fprintf(stderr, "AST(");
+	if(!node) return;
+	for(int i = 0; i < level; i++) fprintf(stderr, "::");
+	fprintf(stderr, "AST(");
 
 	if(node->type <= AST_PROGRAM) fprintf(stderr, nodeType[node->type]);
 	else fprintf(stderr, "AST_UNKNOWN");
@@ -47,10 +47,10 @@ void astPrint(AST* node, int level)
 
 void astDecompile(AST *node)
 {
-    if (!node) return;
-    
+	if (!node) return;
+	
 	switch (node->type)
-    {
+	{
 		case AST_SYMBOL:
 			fprintf(out,"%s",node->symbol->text);
 			break;
@@ -251,5 +251,5 @@ void astDecompile(AST *node)
 			astDecompile(node->son[0]);
 			fprintf(out,"}\n");
 			break;
-    }  
+	}  
 }
