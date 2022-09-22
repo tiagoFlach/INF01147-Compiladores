@@ -28,7 +28,7 @@ extern AST *ASTroot;
 int main(int argc, char** argv)
 {
 	int token = 0;
-	int serrors = 0;
+	int semanticErrors = 0;
 
 	initMe();
 
@@ -57,14 +57,14 @@ int main(int argc, char** argv)
 	
 	astDecompile(ASTroot);
 	check_semantic(ASTroot);
-	tacPrintBackwards(generateCode(ASTroot));
 
 	hashPrint();
 	astPrint(ASTroot, 0);
+	tacPrintBackwards(generateCode(ASTroot));
 
-	if((serrors = get_semantic_errors()) != 0)
+	if((semanticErrors = get_semantic_errors()) != 0)
 	{
-		printf("Compilation aborted! %d semantic errors!\n", serrors);
+		printf("Compilation aborted! %d semantic errors!\n", semanticErrors);
 		exit(4);
 	}
 

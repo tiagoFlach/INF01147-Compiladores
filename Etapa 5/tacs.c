@@ -97,10 +97,47 @@ TAC* generateCode(AST *node)
 	// This node
 	switch(node->type)
 	{
-		case AST_SYMBOL: result = tacCreate(TAC_SYMBOL, node->symbol,0,0); break;
-		case AST_ADD: 
+		case AST_SYMBOL:
+			result = tacCreate(TAC_SYMBOL, node->symbol,0,0); 
+			break;
+		case AST_ADD:
 			result = tacJoin(tacJoin(code[0], code[1]), 
 				tacCreate(TAC_ADD, 
+					makeTemp(), 
+					code[0] ? code[0]->res : 0, 
+					code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_SUB:
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_SUB, 
+					makeTemp(), 
+					code[0] ? code[0]->res : 0, 
+					code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_DIV:
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_DIV, 
+					makeTemp(), 
+					code[0] ? code[0]->res : 0, 
+					code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_MUL:
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_MUL, 
+					makeTemp(), 
+					code[0] ? code[0]->res : 0, 
+					code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_LSR:
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_LSR, 
+					makeTemp(), 
+					code[0] ? code[0]->res : 0, 
+					code[1] ? code[1]->res : 0)); 
+			break;
+		case AST_GTR:
+			result = tacJoin(tacJoin(code[0], code[1]), 
+				tacCreate(TAC_GTR, 
 					makeTemp(), 
 					code[0] ? code[0]->res : 0, 
 					code[1] ? code[1]->res : 0)); 
@@ -110,8 +147,48 @@ TAC* generateCode(AST *node)
 			break;
 		case AST_IF:
 			result = makeIfThen(code[0], code[1]); break;
-		default: result = tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], code[3])));
-		break;
+		
+
+		// case AST_AND: break;
+		// case AST_OR: break;
+		// case AST_NOT: break;
+		// case AST_LSE: break;
+		// case AST_GTE: break;
+		// case AST_EQU: break;
+		// case AST_DIF: break;
+		// // case AST_ASSIGN: break;
+		// case AST_DECVAR: break;
+		// case AST_DECVEC: break;
+		// case AST_DECFUN: break;
+		// case AST_CMD: break;
+		// case AST_LCMD: break;
+		// case AST_LCMDT: break;
+		// case AST_EXPN: break;
+		// case AST_VAR: break;
+		// case AST_VECTOR: break;
+		// case AST_MSG: break;
+		// case AST_MSGL: break;
+		// // case AST_IF: break;
+		// case AST_IF_ELSE: break;
+		// case AST_WHILE: break;
+		// case AST_READ: break;
+		// case AST_PRINT: break;
+		// case AST_RETURN: break;
+		// case AST_CALL: break;
+		// case AST_CHAR: break;
+		// case AST_FLOAT: break;
+		// case AST_INT: break;
+		// case AST_INTV: break;
+		// case AST_EXPL: break;
+		// case AST_ARGL: break;
+		// case AST_DECL: break;
+		// case AST_BLCK: break;
+		// case AST_PROGRAM: break;
+
+
+		default: 
+			result = tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], code[3])));
+			break;
 	}
 
 	return result;

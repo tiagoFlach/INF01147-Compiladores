@@ -33,7 +33,7 @@ AST* astCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3)
 void astPrint(AST* node, int level)
 {
 	if(!node) return;
-	for(int i = 0; i < level; i++) fprintf(stderr, "::");
+	for(int i = 0; i < level; i++) fprintf(stderr, " ");
 	fprintf(stderr, "AST(");
 
 	if(node->type <= AST_PROGRAM) fprintf(stderr, nodeType[node->type]);
