@@ -28,6 +28,7 @@ enum tacSymbol {
 	TAC_ENDFUN,
 	TAC_IFZ,
 	TAC_JUMP,
+	TAC_JUMPZ,
 	TAC_CALL,
 	TAC_ARG,
 	TAC_RET,
@@ -43,11 +44,11 @@ enum tacSymbol {
 	// AST_AND,
 	// AST_OR,
 	// AST_NOT,
-	// // Operators
-	// AST_LSE,
-	// AST_GTE,
-	// AST_EQU,
-	// AST_DIF,
+	// Operators
+	TAC_LSE,
+	TAC_GTE,
+	TAC_EQU,
+	TAC_DIF,
 	// AST_ASSIGN,
 	// // Commands
 	// AST_DECVAR,
@@ -70,7 +71,7 @@ enum tacSymbol {
 	// // Functions
 	// AST_READ,
 	// AST_PRINT,
-	// AST_RETURN,
+	TAC_RETURN,
 	// AST_CALL,
 	// // Type
 	// AST_CHAR,
