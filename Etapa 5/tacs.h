@@ -32,10 +32,14 @@ enum tacSymbol {
 	TAC_CALL,
 	TAC_ARG,
 	TAC_RET,
-	TAC_PRINT,
+	// Functions
 	TAC_READ,
+	TAC_PRINT,
+	TAC_RETURN,
 	TAC_COPY,
 	TAC_JFALSE,
+	// Type
+	TAC_LIT,
 
 
 
@@ -51,8 +55,8 @@ enum tacSymbol {
 	TAC_DIF,
 	// AST_ASSIGN,
 	// // Commands
-	// AST_DECVAR,
-	// AST_DECVEC,
+	// TAC_DECVAR,
+	// TAC_DECVEC,
 	// AST_DECFUN,
 	// AST_CMD,
 	// AST_LCMD,
@@ -68,15 +72,9 @@ enum tacSymbol {
 	// AST_IF,
 	// AST_IF_ELSE,
 	// AST_WHILE,
-	// // Functions
-	// AST_READ,
-	// AST_PRINT,
-	TAC_RETURN,
+
 	// AST_CALL,
-	// // Type
-	// AST_CHAR,
-	// AST_FLOAT,
-	// AST_INT,
+	
 	// // Initialization
 	// AST_INTV,
 	// // Lists

@@ -26,7 +26,7 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
-	if (tac->type = TAC_SYMBOL) return;
+	if (tac->type == TAC_SYMBOL) return;
 	fprintf(stderr, "TAC(");
 
 	switch(tac->type)
@@ -56,11 +56,12 @@ void tacPrint(TAC* tac)
 		default: fprintf(stderr, "TAC_UNKNOWN"); break;
 	}
 
-	fprintf(stderr, ",%s", (tac->res) ? tac->res->text : "");
-	fprintf(stderr, ",%s", (tac->op1) ? tac->op1->text : "");
-	fprintf(stderr, ",%s", (tac->op2) ? tac->op2->text : "");
+	fprintf(stderr, ", %s", (tac->res) ? tac->res->text : "");
+	fprintf(stderr, ", %s", (tac->op1) ? tac->op1->text : "");
+	fprintf(stderr, ", %s", (tac->op2) ? tac->op2->text : "");
 	fprintf(stderr, ");\n");
 }
+
 void tacPrintBackwards(TAC* tac)
 {
 	if (!tac)
@@ -107,7 +108,7 @@ TAC* generateCode(AST *node)
 	switch(node->type)
 	{
 		case AST_SYMBOL:
-			result = tacCreate(TAC_SYMBOL, node->symbol,0,0); 
+			result = tacCreate(TAC_SYMBOL, node->symbol, 0, 0); 
 			break;
 		case AST_ADD:
 			result = makeBinaryOperation(TAC_ADD, code[0], code[1]);
@@ -140,16 +141,19 @@ TAC* generateCode(AST *node)
 			result = makeBinaryOperation(TAC_DIF, code[0], code[1]);
 			break;
 		case AST_ASSIGN:
-			result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0,0));
+			result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0, 0));
 			break;
-		
-
-		// case AST_AND: break;
-		// case AST_OR: break;
-		// case AST_NOT: break;
-		// // case AST_ASSIGN: break;
-		// case AST_DECVAR: break;
-		// case AST_DECVEC: break;
+		case AST_CHAR:
+		case AST_FLOAT:
+		case AST_INT:
+			result = tacCreate(TAC_LIT, node->symbol, 0, 0); 
+			break;
+		case AST_DECVAR:
+			result = tacJoin(code[1],tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+			break;
+		case AST_DECVEC:
+			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol,code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+			break;
 		// case AST_DECFUN: break;
 		// case AST_CMD: break;
 		// case AST_LCMD: break;
@@ -159,6 +163,27 @@ TAC* generateCode(AST *node)
 		// case AST_VECTOR: break;
 		// case AST_MSG: break;
 		// case AST_MSGL: break;
+		
+		case AST_READ: 
+			result = tacCreate(TAC_READ, 0, 0, 0);
+			break;
+		case AST_CALL: 
+			result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_CALL, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)));
+			break;
+		case AST_PRINT:
+			result = tacJoin(code[1], tacCreate(TAC_PRINT, node->symbol, code[0] ? code[0]->res : 0, 0));
+			break;
+		case AST_RETURN: 
+            result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0] ? code[0]->res : 0, 0, 0));
+            break;
+
+		// case AST_INTV: break;
+		// case AST_EXPL: break;
+		// case AST_ARGL: break;
+		// case AST_DECL: break;
+		// case AST_BLCK: break;
+		// case AST_PROGRAM: break;
+
 		case AST_IF: 
 			result = makeIfThen(code[0], code[1]);
 			break;
@@ -168,22 +193,6 @@ TAC* generateCode(AST *node)
 		case AST_WHILE: 
 			result = makeWhile(code[0], code[1]);
 			break;
-		case AST_READ: break;
-		// case AST_PRINT: break;
-		case AST_RETURN: 
-            result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0] ? code[0]->res : 0, 0, 0));
-            break;
-		// case AST_CALL: break;
-		// case AST_CHAR: break;
-		// case AST_FLOAT: break;
-		// case AST_INT: break;
-		// case AST_INTV: break;
-		// case AST_EXPL: break;
-		// case AST_ARGL: break;
-		// case AST_DECL: break;
-		// case AST_BLCK: break;
-		// case AST_PROGRAM: break;
-
 		default: 
 			result = tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], code[3])));
 			break;
@@ -237,8 +246,30 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2)
 						tacJoin(code2, jumplabelTAC))))));
 }
 
-TAC* makeWhile(TAC* code0, TAC* code1) {
+TAC* makeWhile(TAC* code0, TAC* code1)
+{
+	TAC* whileTAC = 0;
+	TAC* whilelabelTAC = 0;
+	TAC* jumptac = 0;
+	TAC* jumplabelTAC = 0;
 
+	HASH_NODE* whilelabel = 0;
+	whilelabel = makeLabel();
+
+	HASH_NODE* jumplabel = 0;
+	jumplabel = makeLabel();
+
+	whileTAC = tacCreate(TAC_JUMPZ, whilelabel, code0 ? code0->res:0, 0);
+	whilelabelTAC = tacCreate(TAC_LABEL, whilelabel, 0, 0);
+
+	jumptac = tacCreate(TAC_JUMP, jumplabel, 0, 0);    
+	jumplabelTAC = tacCreate(TAC_LABEL, jumplabel, 0, 0);
+
+	return tacJoin(jumplabelTAC,
+		tacJoin(code0,
+			tacJoin(whileTAC,
+				tacJoin(code1,
+					tacJoin(jumptac, whilelabelTAC)))));
 }
 
 TAC* makeBinaryOperation(int type, TAC* code0, TAC* code1) {
