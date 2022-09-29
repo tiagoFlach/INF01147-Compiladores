@@ -42,12 +42,10 @@ enum tacSymbol {
 	TAC_LIT,
 
 
-
-
 	// // Logic
-	// AST_AND,
-	// AST_OR,
-	// AST_NOT,
+	TAC_AND,
+	TAC_OR,
+	TAC_NOT,
 	// Operators
 	TAC_LSE,
 	TAC_GTE,

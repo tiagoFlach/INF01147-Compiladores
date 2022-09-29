@@ -90,6 +90,7 @@ TAC* tacJoin(TAC* l1, TAC* l2)
 TAC* makeIfThen(TAC* code0, TAC* code1);
 TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
 TAC* makeWhile(TAC* code0, TAC* code1);
+TAC* makeUnaryOperation(int type, TAC* code0);
 TAC* makeBinaryOperation(int type, TAC* code0, TAC* code1);
 
 TAC* generateCode(AST *node)
@@ -140,8 +141,18 @@ TAC* generateCode(AST *node)
 		case AST_DIF:
 			result = makeBinaryOperation(TAC_DIF, code[0], code[1]);
 			break;
+		case AST_AND:
+			result = makeBinaryOperation(TAC_AND, code[0], code[1]);
+			break;
+		case AST_OR:
+			result = makeBinaryOperation(TAC_OR, code[0], code[1]);
+			break;
+		case AST_NOT:
+			result = makeUnaryOperation(TAC_NOT, code[0]);
+			break;
 		case AST_ASSIGN:
 			result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0, 0));
+			// result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0));
 			break;
 		case AST_CHAR:
 		case AST_FLOAT:
@@ -149,17 +160,28 @@ TAC* generateCode(AST *node)
 			result = tacCreate(TAC_LIT, node->symbol, 0, 0); 
 			break;
 		case AST_DECVAR:
-			result = tacJoin(code[1],tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+			result = tacJoin(code[1], tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
 			break;
 		case AST_DECVEC:
-			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol,code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
 			break;
-		// case AST_DECFUN: break;
+		// case AST_DECFUN:
+		// 	preResult = tacJoin(tacJoin(tacCreate(TAC_BEGINGFUN, node->symbol, 
+		// 									0, 
+		// 									code[1]?code[1]->res:0),
+		// 						code[2]), 
+		// 							tacCreate(TAC_ENDFUN, node->symbol, 0, 0));
+
+		// 	result = tacJoin(code[1], preResult);
+		// 	break;
+		// case AST_DECFUN: 
+		// 	// result = 
+		// 	break;
 		// case AST_CMD: break;
 		// case AST_LCMD: break;
 		// case AST_LCMDT: break;
 		// case AST_EXPN: break;
-		// case AST_VAR: break;
+		case AST_VAR: break;
 		// case AST_VECTOR: break;
 		// case AST_MSG: break;
 		// case AST_MSGL: break;
@@ -210,9 +232,9 @@ TAC* makeIfThen(TAC* code0, TAC* code1)
 	HASH_NODE * newlabel = 0;
 	newlabel = makeLabel();
 
-	jumptac = tacCreate(TAC_JFALSE, newlabel,
-						code0 ? code0->res : 0, 0);
+	jumptac = tacCreate(TAC_JFALSE, newlabel, code0 ? code0->res : 0, 0);
 	jumptac->prev = code0;
+
 	labeltac = tacCreate(TAC_LABEL, newlabel, 0, 0);
 	labeltac->prev = code1;
 
@@ -232,7 +254,7 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2)
 	HASH_NODE* jumplabel = 0;
 	jumplabel = makeLabel();
 
-	jumpztac = tacCreate(TAC_JUMPZ, jumpzlabel, code0?code0->res:0, 0);
+	jumpztac = tacCreate(TAC_JUMPZ, jumpzlabel, code0 ? code0->res : 0, 0);
 	jumpzlabelTAC = tacCreate(TAC_LABEL, jumpzlabel, 0, 0);
 
 	jumptac = tacCreate(TAC_JUMP, jumplabel, 0, 0);    
@@ -270,6 +292,11 @@ TAC* makeWhile(TAC* code0, TAC* code1)
 			tacJoin(whileTAC,
 				tacJoin(code1,
 					tacJoin(jumptac, whilelabelTAC)))));
+}
+
+TAC* makeUnaryOperation(int type, TAC* code0) {
+	return tacJoin(code0, 
+		tacCreate(type, makeTemp(), code0 ? code0->res : 0, 0));
 }
 
 TAC* makeBinaryOperation(int type, TAC* code0, TAC* code1) {
