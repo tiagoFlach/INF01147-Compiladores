@@ -16,19 +16,12 @@
 enum tacSymbol {
 	TAC_SYMBOL,
 	TAC_MOVE,
-	// Mathematics
-	TAC_ADD,
-	TAC_SUB,
-	TAC_DIV,
-	TAC_MUL,
-	// Comparison
-	TAC_LSR,
-	TAC_GTR,
+
 	TAC_LABEL,
-	TAC_ENDFUN,
 	TAC_IFZ,
 	TAC_JUMP,
 	TAC_JUMPZ,
+	TAC_JFALSE,
 	TAC_CALL,
 	TAC_ARG,
 	TAC_RET,
@@ -37,12 +30,16 @@ enum tacSymbol {
 	TAC_PRINT,
 	TAC_RETURN,
 	TAC_COPY,
-	TAC_JFALSE,
+	TAC_BEGINFUN,
+	TAC_ENDFUN,
+	// Mathematics
+	TAC_ADD,
+	TAC_SUB,
+	TAC_DIV,
+	TAC_MUL,
 	// Type
 	TAC_LIT,
-
-
-	// // Logic
+	// Logic
 	TAC_AND,
 	TAC_OR,
 	TAC_NOT,
@@ -51,17 +48,22 @@ enum tacSymbol {
 	TAC_GTE,
 	TAC_EQU,
 	TAC_DIF,
+	// Comparison
+	TAC_LSR,
+	TAC_GTR,
 	// AST_ASSIGN,
 	// // Commands
 	// TAC_DECVAR,
 	// TAC_DECVEC,
 	// AST_DECFUN,
+
+
 	// AST_CMD,
 	// AST_LCMD,
 	// AST_LCMDT,
 	// AST_EXPN,
 	// // Variables
-	// AST_VAR,
+	// TAC_VAR,
 	// AST_VECTOR,
 	// // Message
 	// AST_MSG,
