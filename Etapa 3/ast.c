@@ -36,7 +36,7 @@ void astPrint(AST* node, int level)
 	for(int i = 0; i < level; i++) fprintf(stderr, "  ");
 	fprintf(stderr, "AST(");
 
-	if(node->type <= AST_PROGRAM) fprintf(stderr, nodeType[node->type]);
+	if(node->type <= AST_PROGRAM) fprintf(stderr, "%s", nodeType[node->type]);
 	else fprintf(stderr, "AST_UNKNOWN");
 
 	if(node->symbol) fprintf(stderr, ",%s\n", node->symbol->text);

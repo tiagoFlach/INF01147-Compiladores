@@ -194,7 +194,7 @@ extern char* yytext;
 
 int yyerror(const char* s)
 {
-		fprintf(stderr, s);
+		fprintf(stderr, "%s", s);
 		fprintf(stderr, " at line %d.\n", getLineNumber());
 		fprintf(stderr, "Error here: %s\n", &yytext[0]);
 		exit(3);
