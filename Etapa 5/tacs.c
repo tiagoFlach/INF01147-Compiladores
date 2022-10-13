@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "tacs.h"
 
-char * tacType[TAC_INTV+1] = {
+char * tacType[AST_ARGL+1] = {
 	"TAC_SYMBOL",
 	"TAC_MOVE",
 	"TAC_LABEL",
@@ -19,8 +19,10 @@ char * tacType[TAC_INTV+1] = {
 	"TAC_JUMPZ",
 	"TAC_JFALSE",
 	"TAC_CALL",
+	"TAC_VECTOR",
 	"TAC_ARG",
 	"TAC_RET",
+	"TAC_EXPN",
 	"TAC_READ",
 	"TAC_PRINT",
 	"TAC_RETURN",
@@ -41,10 +43,10 @@ char * tacType[TAC_INTV+1] = {
 	"TAC_LSR",
 	"TAC_GTR",
 	"TAC_VAR",
-	"TAC_VECTOR",
-	"TAC_EXPN",
-	"TAC_ARGL",
-	"TAC_INTV",
+	"AST_INTV",
+	"TAC_MSGL",
+	"AST_EXPL",
+	"AST_ARGL",
 };
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
@@ -63,10 +65,10 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
-	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR)) return;
+	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR) || (tac->type == TAC_EXPN)) return;
 	fprintf(stderr, "TAC(");
 
-	if(tac->type <= TAC_INTV) fprintf(stderr, "%s", tacType[tac->type]);
+	if(tac->type <= AST_ARGL) fprintf(stderr, "%s", tacType[tac->type]);
  	else fprintf(stderr, "TAC_UNKNOWN");
 
 	fprintf(stderr, ", %s", (tac->res) ? tac->res->text : "");
@@ -103,7 +105,7 @@ TAC* tacJoin(TAC* l1, TAC* l2)
 TAC* makeIfThen(TAC* code0, TAC* code1);
 TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
 TAC* makeWhile(TAC* code0, TAC* code1);
-TAC* makeUnaryOperation(int type, TAC* code0);
+TAC* makeUnaryOperation(int type, TAC* code0, int temp);
 TAC* makeBinaryOperation(int type, TAC* code0, TAC* code1);
 
 TAC* generateCode(AST *node)
@@ -160,7 +162,7 @@ TAC* generateCode(AST *node)
 			result = makeBinaryOperation(TAC_OR, code[0], code[1]);
 			break;
 		case AST_NOT:
-			result = makeUnaryOperation(TAC_NOT, code[0]);
+			result = makeUnaryOperation(TAC_NOT, code[0], 1);
 			break;
 		case AST_ASSIGN:
 			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 0)));
@@ -188,33 +190,30 @@ TAC* generateCode(AST *node)
 				)
 			);
             break;
-
 		case AST_VAR: 
 			result = tacCreate(TAC_VAR, node->symbol, 0, 0); 
 			break;
 		case AST_VECTOR: 
-			result = tacCreate(TAC_VECTOR, node->symbol, code[0]->res, 0);;
+			result = tacCreate(TAC_VECTOR, node->symbol, code[0]->res, 0);
 			break;
 		case AST_EXPN:
-			result = makeUnaryOperation(TAC_EXPN, code[0]);
+			result = makeUnaryOperation(TAC_EXPN, code[0], 0);
 			break;
-		// case AST_MSG: break;
-		
 		case AST_READ: 
 			result = tacCreate(TAC_READ, code[0]->res, 0, 0);
 			break;
-		// case AST_EXPL:
-		// 	result = tacJoin(code[1], );
-		// 	break;
-		// case AST_CALL: 
-		// 	result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_CALL, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)));
-		// 	break;
-		// case AST_MSGL:
-		// 	result = tacJoin(code[1], );
-		// 	break;
-		// case AST_PRINT:
-		// 	result = tacJoin(code[1], tacCreate(TAC_PRINT, node->symbol, code[0] ? code[0]->res : 0, 0));
-		// 	break;
+		case AST_EXPL:
+			result = tacJoin(code[1], tacCreate(TAC_EXPL, code[0]->res, 0, 0));
+			break;
+		case AST_CALL: 
+			result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_CALL, node->symbol, code[0] ? code[0]->res : 0, 0)));
+			break;
+		case AST_MSGL:
+			result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_MSGL, code[0]->res, 0, 0)));
+			break;
+		case AST_PRINT:
+			result = tacJoin(code[0], tacCreate(TAC_PRINT, 0, 0, 0));
+			break;
 		case AST_RETURN: 
             result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0] ? code[0]->res : 0, 0, 0));
             break;
@@ -307,9 +306,12 @@ TAC* makeWhile(TAC* code0, TAC* code1)
 					// qual eh dessa ordem? ta certo?
 }
 
-TAC* makeUnaryOperation(int type, TAC* code0) {
+TAC* makeUnaryOperation(int type, TAC* code0, int temp) {
 	return tacJoin(code0, 
-		tacCreate(type, makeTemp(), code0 ? code0->res : 0, 0));
+		tacCreate(type, 
+					temp? makeTemp() : 
+					code0? code0->res : 0, 
+					(temp && code0) ? code0->res : 0, 0));
 }
 
 TAC* makeBinaryOperation(int type, TAC* code0, TAC* code1) {

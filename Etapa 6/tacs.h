@@ -21,8 +21,10 @@ enum tacSymbol {
 	TAC_JUMPZ,
 	TAC_JFALSE,
 	TAC_CALL,
+	TAC_VECTOR,
 	TAC_ARG,
 	TAC_RET,
+	TAC_EXPN,
 	// Functions
 	TAC_READ,
 	TAC_PRINT,
@@ -48,25 +50,12 @@ enum tacSymbol {
 	TAC_LSR,
 	TAC_GTR,
 	TAC_VAR,
-	TAC_VECTOR,
-	TAC_EXPN,
-	// // Commands
-	// TAC_DECVAR,
-	// TAC_DECVEC,
-	// AST_DECFUN,
-
-
-	// // Message
-	// AST_MSG,
-	// AST_MSGL,
-
-	// AST_CALL,
-	
-	// // Initialization
-	// AST_INTV,
-	// // Lists
-	// AST_EXPL,
-	// AST_ARGL,
+	// Initialization
+	TAC_INTV,
+	// Lists
+	TAC_MSGL,
+	TAC_EXPL,
+	TAC_ARGL,
 };
 
 typedef struct tac_node
