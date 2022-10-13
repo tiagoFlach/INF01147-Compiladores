@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "tacs.h"
 
-char * tacType[TAC_EXPN+1] = {
+char * tacType[TAC_INTV+1] = {
 	"TAC_SYMBOL",
 	"TAC_MOVE",
 	"TAC_LABEL",
@@ -43,6 +43,8 @@ char * tacType[TAC_EXPN+1] = {
 	"TAC_VAR",
 	"TAC_VECTOR",
 	"TAC_EXPN",
+	"TAC_ARGL",
+	"TAC_INTV",
 };
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
@@ -64,7 +66,7 @@ void tacPrint(TAC* tac)
 	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR)) return;
 	fprintf(stderr, "TAC(");
 
-	if(tac->type <= TAC_EXPN) fprintf(stderr, "%s", tacType[tac->type]);
+	if(tac->type <= TAC_INTV) fprintf(stderr, "%s", tacType[tac->type]);
  	else fprintf(stderr, "TAC_UNKNOWN");
 
 	fprintf(stderr, ", %s", (tac->res) ? tac->res->text : "");
@@ -166,24 +168,26 @@ TAC* generateCode(AST *node)
 		case AST_DECVAR:
 			result = tacJoin(code[1], tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
 			break;
-		// case AST_INTV: break;
-		// case AST_DECVEC:
-		// 	result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
-		// 	break;
-		// case AST_ARGL:
-		// 	result = tacJoin(code[1], );
-		// 	break;
-		// case AST_DECFUN:
-		// 	result = tacJoin(code[1], 
-		// 		tacJoin(
-		// 			tacJoin(
-		// 				tacCreate(TAC_BEGINFUN, node->symbol, 0, code[1] ? code[1]->res : 0),
-		// 				code[2]
-		// 			), 
-		// 			tacCreate(TAC_ENDFUN, node->symbol, 0, 0)
-		// 		)
-		// 	);
-        //     break;
+		case AST_INTV: 
+			result = tacJoin(code[1], tacCreate(TAC_INTV, code[0]->res, 0, 0));
+			break;
+		case AST_DECVEC:
+			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_VECTOR, node->symbol, code[1] ? code[1]->res : 0, 0));
+			break;
+		case AST_ARGL:
+			result = tacJoin(code[1], tacCreate(TAC_ARGL, node->symbol, 0, 0));
+			break;
+		case AST_DECFUN:
+			result = tacJoin(code[1], 
+				tacJoin(
+					tacJoin(
+						tacCreate(TAC_BEGINFUN, node->symbol, 0, 0),
+						code[2]
+					), 
+					tacCreate(TAC_ENDFUN, node->symbol, 0, 0)
+				)
+			);
+            break;
 
 		case AST_VAR: 
 			result = tacCreate(TAC_VAR, node->symbol, 0, 0); 

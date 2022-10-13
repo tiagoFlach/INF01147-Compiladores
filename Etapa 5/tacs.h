@@ -50,6 +50,8 @@ enum tacSymbol {
 	TAC_VAR,
 	TAC_VECTOR,
 	TAC_EXPN,
+	TAC_ARGL,
+	TAC_INTV,
 	// // Commands
 	// TAC_DECVAR,
 	// TAC_DECVEC,
