@@ -7,9 +7,7 @@
  * 
  */
 
-#ifndef TACS_HEADER
-#define TACS_HEADER
-
+#pragma once
 #include "hash.h"
 #include "ast.h"
 
@@ -37,8 +35,6 @@ enum tacSymbol {
 	TAC_SUB,
 	TAC_DIV,
 	TAC_MUL,
-	// Type
-	TAC_LIT,
 	// Logic
 	TAC_AND,
 	TAC_OR,
@@ -51,27 +47,18 @@ enum tacSymbol {
 	// Comparison
 	TAC_LSR,
 	TAC_GTR,
-	// AST_ASSIGN,
+	TAC_VAR,
+	TAC_VECTOR,
+	TAC_EXPN,
 	// // Commands
 	// TAC_DECVAR,
 	// TAC_DECVEC,
 	// AST_DECFUN,
 
 
-	// AST_CMD,
-	// AST_LCMD,
-	// AST_LCMDT,
-	// AST_EXPN,
-	// // Variables
-	// TAC_VAR,
-	// AST_VECTOR,
 	// // Message
 	// AST_MSG,
 	// AST_MSGL,
-	// // Conditions
-	// AST_IF,
-	// AST_IF_ELSE,
-	// AST_WHILE,
 
 	// AST_CALL,
 	
@@ -80,9 +67,6 @@ enum tacSymbol {
 	// // Lists
 	// AST_EXPL,
 	// AST_ARGL,
-	// AST_DECL,
-	// AST_BLCK,
-	// AST_PROGRAM
 };
 
 typedef struct tac_node
@@ -102,5 +86,3 @@ void tacPrintBackwards(TAC* tac);
 TAC* tacJoin(TAC* l1, TAC* l2);
 
 TAC* generateCode(AST *node);
-
-#endif

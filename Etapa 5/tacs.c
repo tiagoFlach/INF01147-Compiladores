@@ -10,6 +10,41 @@
 #include <stdlib.h>
 #include "tacs.h"
 
+char * tacType[TAC_EXPN+1] = {
+	"TAC_SYMBOL",
+	"TAC_MOVE",
+	"TAC_LABEL",
+	"TAC_IFZ",
+	"TAC_JUMP",
+	"TAC_JUMPZ",
+	"TAC_JFALSE",
+	"TAC_CALL",
+	"TAC_ARG",
+	"TAC_RET",
+	"TAC_READ",
+	"TAC_PRINT",
+	"TAC_RETURN",
+	"TAC_COPY",
+	"TAC_BEGINFUN",
+	"TAC_ENDFUN",
+	"TAC_ADD",
+	"TAC_SUB",
+	"TAC_DIV",
+	"TAC_MUL",
+	"TAC_AND",
+	"TAC_OR",
+	"TAC_NOT",
+	"TAC_LSE",
+	"TAC_GTE",
+	"TAC_EQU",
+	"TAC_DIF",
+	"TAC_LSR",
+	"TAC_GTR",
+	"TAC_VAR",
+	"TAC_VECTOR",
+	"TAC_EXPN",
+};
+
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 {
 	TAC* newtac = 0;
@@ -26,42 +61,15 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
-	if (tac->type == TAC_SYMBOL) return;
+	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR)) return;
 	fprintf(stderr, "TAC(");
 
-	switch(tac->type)
-	{
-		case TAC_SYMBOL: fprintf(stderr, "TAC_SYMBOL"); break;
-		case TAC_MOVE: fprintf(stderr, "TAC_MOVE"); break;
-		case TAC_ADD: fprintf(stderr, "TAC_ADD"); break;
-		case TAC_SUB: fprintf(stderr, "TAC_SUB"); break;
-		case TAC_MUL: fprintf(stderr, "TAC_MUL"); break;
-		case TAC_LSR: fprintf(stderr, "TAC_LSR"); break;
-		case TAC_GTR: fprintf(stderr, "TAC_GTR"); break;
-		case TAC_LSE: fprintf(stderr, "TAC_LSE"); break;
-		case TAC_GTE: fprintf(stderr, "TAC_GTE"); break;
-		case TAC_EQU: fprintf(stderr, "TAC_EQU"); break;
-		case TAC_DIF: fprintf(stderr, "TAC_DIF"); break;
-		case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
-		case TAC_IFZ: fprintf(stderr, "TAC_IFZ"); break;
-		case TAC_JUMP: fprintf(stderr, "TAC_JUMP"); break;
-		case TAC_JFALSE: fprintf(stderr, "TAC_JFALSE"); break;
-		case TAC_BEGINFUN: fprintf(stderr, "TAC_BEGINFUN"); break;
-		case TAC_ENDFUN: fprintf(stderr, "TAC_ENDFUN"); break;
-		case TAC_CALL: fprintf(stderr, "TAC_CALL"); break;
-		case TAC_ARG: fprintf(stderr, "TAC_ARG"); break;
-		case TAC_RET: fprintf(stderr, "TAC_RET"); break;
-		case TAC_PRINT: fprintf(stderr, "TAC_PRINT"); break;
-		case TAC_READ: fprintf(stderr, "TAC_READ"); break;
-		case TAC_COPY: fprintf(stderr, "TAC_COPY"); break;
-		default: fprintf(stderr, "TAC_UNKNOWN"); break;
-	}
+	if(tac->type <= TAC_EXPN) fprintf(stderr, "%s", tacType[tac->type]);
+ 	else fprintf(stderr, "TAC_UNKNOWN");
 
 	fprintf(stderr, ", %s", (tac->res) ? tac->res->text : "");
 	if (tac->op1) fprintf(stderr, ", %s", tac->op1->text);
 	if (tac->op2) fprintf(stderr, ", %s", tac->op2->text);
-	// fprintf(stderr, ", %s", (tac->op1) ? tac->op1->text : "");
-	// fprintf(stderr, ", %s", (tac->op2) ? tac->op2->text : "");
 	fprintf(stderr, ");\n");
 }
 
@@ -107,7 +115,6 @@ TAC* generateCode(AST *node)
 	// Children
 	for (i=0; i<MAX_SONS; ++i)
 		code[i] = generateCode(node->son[i]);
-
 	// This node
 	switch(node->type)
 	{
@@ -154,65 +161,59 @@ TAC* generateCode(AST *node)
 			result = makeUnaryOperation(TAC_NOT, code[0]);
 			break;
 		case AST_ASSIGN:
-			result = tacJoin(code[0], tacCreate(TAC_COPY, node->symbol, code[0] ? code[0]->res : 0, 0));
-			break;
-		case AST_CHAR:
-		case AST_FLOAT:
-		case AST_INT:
-			result = tacCreate(TAC_LIT, node->symbol, 0, 0); 
+			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 0)));
 			break;
 		case AST_DECVAR:
 			result = tacJoin(code[1], tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
 			break;
-		case AST_DECVEC:
-			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
-			break;
-		case AST_DECFUN:
-			result = tacJoin(code[1], 
-				tacJoin(
-					tacJoin(
-						tacCreate(TAC_BEGINFUN, node->symbol, 0, code[1] ? code[1]->res : 0),
-						code[2]
-					), 
-					tacCreate(TAC_ENDFUN, node->symbol, 0, 0)
-				)
-			);
-            break;
+		// case AST_INTV: break;
+		// case AST_DECVEC:
+		// 	result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+		// 	break;
+		// case AST_ARGL:
+		// 	result = tacJoin(code[1], );
+		// 	break;
+		// case AST_DECFUN:
+		// 	result = tacJoin(code[1], 
+		// 		tacJoin(
+		// 			tacJoin(
+		// 				tacCreate(TAC_BEGINFUN, node->symbol, 0, code[1] ? code[1]->res : 0),
+		// 				code[2]
+		// 			), 
+		// 			tacCreate(TAC_ENDFUN, node->symbol, 0, 0)
+		// 		)
+		// 	);
+        //     break;
 
 		case AST_VAR: 
-			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_MOVE, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)));
+			result = tacCreate(TAC_VAR, node->symbol, 0, 0); 
 			break;
-		// case AST_VECTOR: 
-		// 	// result = tacJoin(code[1], tacJoin(code[2], tacCreate(TAC_MOVE, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0)));
-		// 	break;
-		
-		// case AST_CMD: break;
-		// case AST_LCMD: break;
-		// case AST_LCMDT: break;
-		// case AST_EXPN: break;
+		case AST_VECTOR: 
+			result = tacCreate(TAC_VECTOR, node->symbol, code[0]->res, 0);;
+			break;
+		case AST_EXPN:
+			result = makeUnaryOperation(TAC_EXPN, code[0]);
+			break;
 		// case AST_MSG: break;
-		// case AST_MSGL: break;
 		
 		case AST_READ: 
-			result = tacCreate(TAC_READ, 0, 0, 0);
+			result = tacCreate(TAC_READ, code[0]->res, 0, 0);
 			break;
-		case AST_CALL: 
-			result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_CALL, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)));
-			break;
-		case AST_PRINT:
-			result = tacJoin(code[1], tacCreate(TAC_PRINT, node->symbol, code[0] ? code[0]->res : 0, 0));
-			break;
+		// case AST_EXPL:
+		// 	result = tacJoin(code[1], );
+		// 	break;
+		// case AST_CALL: 
+		// 	result = tacJoin(code[1], tacJoin(code[0], tacCreate(TAC_CALL, node->symbol, code[0] ? code[0]->res : 0, code[1] ? code[1]->res : 0)));
+		// 	break;
+		// case AST_MSGL:
+		// 	result = tacJoin(code[1], );
+		// 	break;
+		// case AST_PRINT:
+		// 	result = tacJoin(code[1], tacCreate(TAC_PRINT, node->symbol, code[0] ? code[0]->res : 0, 0));
+		// 	break;
 		case AST_RETURN: 
             result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0] ? code[0]->res : 0, 0, 0));
             break;
-
-		// case AST_INTV: break;
-		// case AST_EXPL: break;
-		// case AST_ARGL: break;
-		// case AST_DECL: break;
-		// case AST_BLCK: break;
-		// case AST_PROGRAM: break;
-
 		case AST_IF: 
 			result = makeIfThen(code[0], code[1]);
 			break;
@@ -264,16 +265,16 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2)
 	jumpztac = tacCreate(TAC_JUMPZ, jumpzlabel, code0 ? code0->res : 0, 0);
 	jumpzlabelTAC = tacCreate(TAC_LABEL, jumpzlabel, 0, 0);
 
-	jumptac = tacCreate(TAC_JUMP, jumplabel, 0, 0);    
+	jumptac = tacCreate(TAC_JUMP, jumplabel, 0, 0);
 	jumplabelTAC = tacCreate(TAC_LABEL, jumplabel, 0, 0);
 
 	return tacJoin(code0, 
 		tacJoin(jumpztac, 
-			tacJoin(code1, 
-				tacJoin(jumptac,
-					tacJoin(jumpzlabelTAC, 
-						tacJoin(code2, jumplabelTAC))))));
-}
+			tacJoin(jumpzlabelTAC, 
+				tacJoin(code1,
+					tacJoin(jumptac, 
+						tacJoin(jumplabelTAC, code2))))));
+}// mudei a ordem aqui pro que eu acho que ta correto
 
 TAC* makeWhile(TAC* code0, TAC* code1)
 {
@@ -299,6 +300,7 @@ TAC* makeWhile(TAC* code0, TAC* code1)
 			tacJoin(whileTAC,
 				tacJoin(code1,
 					tacJoin(jumptac, whilelabelTAC)))));
+					// qual eh dessa ordem? ta certo?
 }
 
 TAC* makeUnaryOperation(int type, TAC* code0) {
