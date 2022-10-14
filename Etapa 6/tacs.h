@@ -23,7 +23,6 @@ enum tacSymbol {
 	TAC_CALL,
 	TAC_VECTOR,
 	TAC_ARG,
-	TAC_RET,
 	TAC_EXPN,
 	// Functions
 	TAC_READ,

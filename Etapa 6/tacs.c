@@ -22,7 +22,6 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_CALL",
 	"TAC_VECTOR",
 	"TAC_ARG",
-	"TAC_RET",
 	"TAC_EXPN",
 	"TAC_READ",
 	"TAC_PRINT",
@@ -334,6 +333,7 @@ TAC* tacReverse(TAC *tac)
 }
 
 void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic);
+void asmBinaryOperation(FILE *fout, TAC *tac, char *mnemonic);
 
 void generateAsm(TAC *first)
 {
@@ -353,7 +353,7 @@ void generateAsm(TAC *first)
 		switch (tac->type)
 		{
 			case TAC_ADD:
-				fprintf(fout, "	## ADD\n"
+				fprintf(fout, "	# ADD\n"
 					"	movl	%s(%%rip), %%edx\n"
 					"	movl	%s(%%rip), %%eax\n"
 					"	addl	%%edx, %%eax\n"
@@ -361,7 +361,7 @@ void generateAsm(TAC *first)
 					tac->op1->text, tac->op2->text, tac->res->text);
 				break;
 			case TAC_SUB:
-				fprintf(fout, "	## SUB\n"
+				fprintf(fout, "	# SUB\n"
 					"	movl	%s(%%rip), %%eax\n"
 					"	movl	%s(%%rip), %%edx\n"
 					"	subl	%%edx, %%eax\n"
@@ -369,7 +369,7 @@ void generateAsm(TAC *first)
 					tac->op1->text, tac->op2->text, tac->res->text);
 				break;
 			case TAC_DIV:
-				fprintf(fout, "	## DIV\n"
+				fprintf(fout, "	# DIV\n"
 					"	movl	%s(%%rip), %%eax\n"
 					"	movl	%s(%%rip), %%ecx\n"
 					"	cltd\n"
@@ -378,7 +378,7 @@ void generateAsm(TAC *first)
 					tac->op1->text, tac->op2->text, tac->res->text);
 				break;
 			case TAC_MUL:
-				fprintf(fout, "	## MUL\n"
+				fprintf(fout, "	# MUL\n"
 					"	movl	%s(%%rip), %%edx\n"
 					"	movl	%s(%%rip), %%eax\n"
 					"	imull	%%edx, %%eax\n"
@@ -409,16 +409,20 @@ void generateAsm(TAC *first)
 				fprintf(fout, "	# LSR\n");
 				asmComparisonOperation(fout, tac, "jl");
 				break;
-			// case TAC_AND:
-			// 	fprintf(fout, " ", );
-			// case TAC_OR:
-			// 	fprintf(fout, " ", );
+			case TAC_AND:
+				fprintf(fout, "	# AND\n");
+				asmBinaryOperation(fout, tac, "and");
+				break;
+			case TAC_OR:
+				fprintf(fout, "	# OR\n");
+				asmBinaryOperation(fout, tac, "or");
+				break;
 			// case TAC_NOT:
 			// 	fprintf(fout, " ", );
 			// case TAC_DECVEC:
 				// break;
 			case TAC_BEGINFUN: 
-				fprintf(fout, "## BEGIN FUNCTION\n"
+				fprintf(fout, "	# BEGIN FUNCTION\n"
 					"	.globl	%s\n"
 					"	.type	%s, @function\n"
 					"%s:\n"
@@ -426,10 +430,21 @@ void generateAsm(TAC *first)
 					"	movq	%%rsp, %%rbp\n\n", tac->res->text, tac->res->text, tac->res->text);
 				break;
 			case TAC_ENDFUN: 
-				fprintf(fout, "## END FUNCTION\n"
+				fprintf(fout, "	# END FUNCTION\n"
 					"	movl	$0, %%eax\n"
 					"	popq	%%rbp\n"
 					"	ret\n\n");
+				break;
+			case TAC_RETURN:
+				fprintf(fout, "	# Return\n");
+
+				if(tac->op1->type == HASH_LIT_I) {
+					fprintf(fout, "	movl	$%s, %%eax\n", tac->op1->text);
+				} else {
+					fprintf(fout, "	movl	%s(%%rip), %%eax\n", tac->op1->text);
+				}
+				fprintf(fout, "	popq	%%rbp\n"
+					"	retq\n");
 				break;
 			case TAC_COPY: 
 				char res[256], op1[256];
@@ -457,21 +472,21 @@ void generateAsm(TAC *first)
 				if((tac->op1->type != HASH_LIT_I) && (tac->op1->type != HASH_LIT_C) && 
 					(tac->op1->type != HASH_LIT_F) && (tac->op1->type != HASH_LIT_S))
 				{
-					fprintf(fout, "## ASSIGN VAR\n"
+					fprintf(fout, "	# ASSIGN VAR\n"
 						"	movl	%s(%%rip), %%eax\n"
 						"	movl	%%eax, %s(%%rip)\n\n", op1, res);
 				} else {
-					fprintf(fout, "## ASSIGN LIT\n"
+					fprintf(fout, "	# ASSIGN LIT\n"
 						"	movl	$%s, %s(%%rip)\n\n", op1, res);	
 				}
 				break;
 			case TAC_MSGL: 
-				fprintf(fout, "## PRINT ARGUMENTS\n"
+				fprintf(fout, "	# PRINT ARGUMENTS\n"
 					"	movl	%s(%%rip), %%eax\n"
 					"	movl	%%eax, %%esi\n\n", tac->res->text);
 				break;
 			case TAC_PRINT: 
-				fprintf(fout, "## PRINT\n"
+				fprintf(fout, "	# PRINT\n"
 					"	leaq	.printInt(%%rip), %%rax\n" // change it to work with strings too
 					"	movq	%%rax, %%rdi\n"
 					"	movl	$0, %%eax\n"
@@ -519,6 +534,25 @@ void generateAsm(TAC *first)
 	// Hash Table
 	printAsm(fout);
 	fclose(fout);
+}
+
+void asmBinaryOperation(FILE *fout, TAC *tac, char *mnemonic) {
+
+	if(tac->op1->type == HASH_LIT_I) {
+		fprintf(fout, "	movq	$%s, %%rax\n", tac->op1->text);
+	}
+	else {
+		fprintf(fout, "	movq	%s(%%rip), %%rax\n", tac->op1->text);
+	}
+
+	if(tac->op2->type == HASH_LIT_I) {
+		fprintf(fout, "	movq	$%s, %%rbx\n", tac->op2->text);
+	} else {
+		fprintf(fout, "	movq	%s(%%rip), %%rbx\n", tac->op2->text);
+	}
+
+	fprintf(fout, "	%s	%%rbx, %%rax\n"
+		"	movq	%%rax, %s(%%rip)\n", mnemonic, tac->res->text);
 }
 
 void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic) {
