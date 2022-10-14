@@ -52,6 +52,7 @@ enum tacSymbol {
 	TAC_VAR,
 	// Initialization
 	TAC_INTV,
+	TAC_DVAR,
 	// Lists
 	TAC_MSGL,
 	TAC_EXPL,

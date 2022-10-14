@@ -44,6 +44,7 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_GTR",
 	"TAC_VAR",
 	"AST_INTV",
+	"TAC_DVAR",
 	"TAC_MSGL",
 	"AST_EXPL",
 	"AST_ARGL",
@@ -125,16 +126,16 @@ TAC* generateCode(AST *node)
 		case AST_SYMBOL:
 			result = tacCreate(TAC_SYMBOL, node->symbol, 0, 0); 
 			break;
-		case AST_ADD:
+		case AST_ADD://foi
 			result = makeBinaryOperation(TAC_ADD, code[0], code[1]);
 			break;
-		case AST_SUB:
+		case AST_SUB://foi
 			result = makeBinaryOperation(TAC_SUB, code[0], code[1]);
 			break;
-		case AST_DIV:
+		case AST_DIV://foi
 			result = makeBinaryOperation(TAC_DIV, code[0], code[1]);
 			break;
-		case AST_MUL:
+		case AST_MUL://foi
 			result = makeBinaryOperation(TAC_MUL, code[0], code[1]);
 			break;
 		case AST_LSR:
@@ -164,11 +165,11 @@ TAC* generateCode(AST *node)
 		case AST_NOT:
 			result = makeUnaryOperation(TAC_NOT, code[0], 1);
 			break;
-		case AST_ASSIGN:
+		case AST_ASSIGN://foi
 			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 0)));
 			break;
-		case AST_DECVAR:
-			result = tacJoin(code[1], tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+		case AST_DECVAR://foi
+			result = tacJoin(code[1], tacCreate(TAC_DVAR, node->symbol, code[1] ? code[1]->res : 0, 0));
 			break;
 		case AST_INTV: 
 			result = tacJoin(code[1], tacCreate(TAC_INTV, code[0]->res, 0, 0));
@@ -176,10 +177,10 @@ TAC* generateCode(AST *node)
 		case AST_DECVEC:
 			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_VECTOR, node->symbol, code[1] ? code[1]->res : 0, 0));
 			break;
-		case AST_ARGL:
+		case AST_ARGL:// tem que vir depois?
 			result = tacJoin(code[1], tacCreate(TAC_ARGL, node->symbol, 0, 0));
 			break;
-		case AST_DECFUN:
+		case AST_DECFUN://foi
 			result = tacJoin(code[1], 
 				tacJoin(
 					tacJoin(
@@ -190,7 +191,7 @@ TAC* generateCode(AST *node)
 				)
 			);
             break;
-		case AST_VAR: 
+		case AST_VAR: //foi
 			result = tacCreate(TAC_VAR, node->symbol, 0, 0); 
 			break;
 		case AST_VECTOR: 
@@ -339,33 +340,104 @@ void generateAsm(TAC *first)
 	fout = fopen("output.s", "w");
 
 	// Init
-	fprintf(fout, "## FIXED INIT\n"
-	"	.section		__TEXT,__cstring,__cstring_literals\n"
-	"	printintstr:	.asciz	\"%%d\\n\"\n"
-	"	printstringstr:	.asciz	\"%%s\\n\"\n"
-	"\n"
-	"	.section		__TEXT,__text,regular,pure_instructions\n");
+	fprintf(fout, "## FIXED HEADER\n"
+	".section	.rodata\n"
+	"	.printInt: .string	\"%%d\"\n"
+	"	.printStr: .string	\"%%s\"\n\n");
 
 	// Each Tac
-	for (tac = first; tac; tac->next)
+	for (tac = first; tac; tac = tac->next)
 	{
 		switch (tac->type)
 		{
-			// case TAC_SYMBOL: break;
+			case TAC_ADD:
+				fprintf(fout, "## ADD\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	addl	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_SUB:
+				fprintf(fout, "## SUB\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	subl	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_DIV:
+				fprintf(fout, "## DIV\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%s(%%rip), %%ecx\n"
+					"	cltd\n"
+					"	idivl	%%ecx\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_MUL:
+				fprintf(fout, "## MUL\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	imull	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			// case TAC_LSR:
+			// 	fprintf(fout, " ", );
+			// case TAC_LSE:
+			// 	fprintf(fout, " ", );
+			// case TAC_GTE:
+			// 	fprintf(fout, " ", );
+			// case TAC_EQU:
+			// 	fprintf(fout, " ", );
+			// case TAC_DIF:
+			// 	fprintf(fout, " ", );
+			// case TAC_AND:
+			// 	fprintf(fout, " ", );
+			// case TAC_OR:
+			// 	fprintf(fout, " ", );
+			// case TAC_NOT:
+			// 	fprintf(fout, " ", );
 			case TAC_BEGINFUN: 
 				fprintf(fout, "## BEGIN FUNCTION\n"
-					"	.globl	%s\n"
-					"_%s:\n"
+					".text\n"
+					".globl	%s\n"
+					".type	%s, @function\n"
+					"%s:\n"
 					"	pushq	%%rbp\n"
-					"	movq	%%rsp, %%rbp\n", tac->res->text, tac->res->text);
+					"	movq	%%rsp, %%rbp\n\n", tac->res->text, tac->res->text, tac->res->text);
 				break;
 			case TAC_ENDFUN: 
 				fprintf(fout, "## END FUNCTION\n"
+					"	movl	$0, %%eax\n"
 					"	popq	%%rbp\n"
-					"	retq\n");
+					"	ret\n\n");
 				break;
-			// case TAC_PRINTINT: break;
-			
+			case TAC_COPY: 
+				if((tac->op1->type != HASH_LIT_I) && (tac->op1->type != HASH_LIT_C) && 
+					(tac->op1->type != HASH_LIT_F) && (tac->op1->type != HASH_LIT_S))
+				{
+					fprintf(fout, "## ASSIGN VAR\n"
+						"	movl	%s(%%rip), %%eax\n"
+						"	movl	%%eax, %s(%%rip)\n\n", tac->op1->text, tac->res->text);
+				} else {
+					fprintf(fout, "## ASSIGN LIT\n"
+						"	movl	$%s, %s(%%rip)\n\n", tac->op1->text, tac->res->text);	
+				}
+				break;
+			case TAC_MSGL: 
+				fprintf(fout, "## PRINT ARGUMENTS\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%%eax, %%esi\n\n", tac->res->text);
+				break;
+			case TAC_PRINT: 
+				fprintf(fout, "## PRINT\n"
+					"	leaq	.printInt(%%rip), %%rax\n" // change it to work with strings too
+					"	movq	%%rax, %%rdi\n"
+					"	movl	$0, %%eax\n"
+					"	call	printf@PLT\n\n");
+				break;
 			default:
 				break;
 		}
