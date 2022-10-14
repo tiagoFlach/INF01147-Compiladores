@@ -43,4 +43,4 @@ gexe:
 grun:			
 			./$(ASM).exe
 clean:
-			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' -o -name '*.output' -o -name '*.out' \) -type f -delete
+			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(ASM).*' -o -name '$(YAC).*' -o -name '*.output' -o -name '*.out' \) -type f -delete
