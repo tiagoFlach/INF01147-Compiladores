@@ -339,12 +339,10 @@ void generateAsm(TAC *first)
 	fout = fopen("output.s", "w");
 
 	// Init
-	fprintf(fout, "## FIXED INIT\n"
-	"	.section		__TEXT,__cstring,__cstring_literals\n"
-	"	printintstr:	.asciz	\"%%d\\n\"\n"
-	"	printstringstr:	.asciz	\"%%s\\n\"\n"
-	"\n"
-	"	.section		__TEXT,__text,regular,pure_instructions\n");
+	fprintf(fout, "## FIXED HEADER\n"
+	".section	.rodata\n"
+	"	.printInt: .string	\"%%d\"\n"
+	"	.printStr: .string	\"%%s\"\n\n");
 
 	// Each Tac
 	for (tac = first; tac; tac = tac->next)
@@ -355,9 +353,10 @@ void generateAsm(TAC *first)
 			case TAC_BEGINFUN: 
 				fprintf(fout, "## BEGIN FUNCTION\n"
 					"	.globl	%s\n"
-					"_%s:\n"
+					"	.type	%s, @function\n"
+					"%s:\n"
 					"	pushq	%%rbp\n"
-					"	movq	%%rsp, %%rbp\n", tac->res->text, tac->res->text);
+					"	movq	%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text);
 				break;
 			case TAC_ENDFUN: 
 				fprintf(fout, "## END FUNCTION\n"
@@ -365,6 +364,25 @@ void generateAsm(TAC *first)
 					"	retq\n");
 				break;
 			// case TAC_PRINTINT: break;
+			case TAC_EQU:
+				fprintf(fout, "	# EQU\n"
+					"	movl	%s, %%eax\n"
+					"	cmpl	%s, %%eax\n", tac->op1->text, tac->op2->text);
+				break;
+			case TAC_LABEL:
+				fprintf(fout, ".%s:\n", tac->res->text);
+				break; 
+			case TAC_JUMP:
+				fprintf(fout, "	# Jump\n"
+					"	jmp	.%s\n", tac->res->text);
+				break;
+			case TAC_JUMPZ:
+			case TAC_JFALSE:
+				fprintf(fout, "	# Pulo condicional\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	cmpl	$0, %%eax\n"
+					"	je	.%s\n", tac->op1->text, tac->res->text);
+				break;
 			
 			default:
 				break;

@@ -74,7 +74,9 @@ void printAsm(FILE *fout)
 	int i;
 	HASH_NODE *node;
 	fprintf(fout, "## DATA SECTION\n"
-		"	.section	__DATA,__data\n\n");
+		"	.section	.note.GNU-stack,\"\",@progbits\n"
+		"	.section	.note.gnu.property,\"a\"\n"
+		"	.data\n");
 	for (i = 0; i < HASH_SIZE; ++i)
 		for (node = Table[i]; node; node = node->next)
 			if (node->type == HASH_VAR)
