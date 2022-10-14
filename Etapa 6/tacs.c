@@ -140,22 +140,22 @@ TAC* generateCode(AST *node)
 		case AST_MUL://foi
 			result = makeBinaryOperation(TAC_MUL, code[0], code[1]);
 			break;
-		case AST_LSR:
+		case AST_LSR://foi
 			result = makeBinaryOperation(TAC_LSR, code[0], code[1]);
 			break;
-		case AST_GTR:
+		case AST_GTR://foi
 			result = makeBinaryOperation(TAC_GTR, code[0], code[1]);
 			break;
-		case AST_LSE:
+		case AST_LSE://foi
 			result = makeBinaryOperation(TAC_LSE, code[0], code[1]);
 			break;
-		case AST_GTE:
+		case AST_GTE://foi
 			result = makeBinaryOperation(TAC_GTE, code[0], code[1]);
 			break;
-		case AST_EQU:
+		case AST_EQU://foi
 			result = makeBinaryOperation(TAC_EQU, code[0], code[1]);
 			break;
-		case AST_DIF:
+		case AST_DIF://foi
 			result = makeBinaryOperation(TAC_DIF, code[0], code[1]);
 			break;
 		case AST_AND:
@@ -175,10 +175,10 @@ TAC* generateCode(AST *node)
 		case AST_DECVAR://foi
 			result = tacJoin(code[1], tacCreate(TAC_DECVAR, node->symbol, code[1] ? code[1]->res : 0, 0));
 			break;
-		case AST_INTV: 
+		case AST_INTV: //foi
 			result = tacJoin(tacCreate(TAC_INTV, code[0]->res, 0, 0), code[1]);
 			break;
-		case AST_DECVEC:
+		case AST_DECVEC://foi
 			result = tacJoin(tacCreate(TAC_DECVEC, node->symbol, code[1] ? code[1]->res : 0, 0), tacJoin(code[1], code[2]));
 			break;
 		case AST_ARGL:// tem que vir depois?
@@ -198,7 +198,7 @@ TAC* generateCode(AST *node)
 		case AST_VAR: //foi
 			result = tacCreate(TAC_VAR, node->symbol, 0, 0); 
 			break;
-		case AST_VECTOR: 
+		case AST_VECTOR: //foi
 			result = tacCreate(TAC_VECTOR, node->symbol, code[0]->res, 0);
 			break;
 		case AST_EXPN:
@@ -222,13 +222,13 @@ TAC* generateCode(AST *node)
 		case AST_RETURN: 
             result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0] ? code[0]->res : 0, 0, 0));
             break;
-		case AST_IF: 
+		case AST_IF: //foi
 			result = makeIfThen(code[0], code[1]);
 			break;
-		case AST_IF_ELSE: 
+		case AST_IF_ELSE: //foi
 			result = makeIfThenElse(code[0], code[1], code[2]);
 			break;
-		case AST_WHILE: 
+		case AST_WHILE: //foi
 			result = makeWhile(code[0], code[1]);
 			break;
 		default: 
@@ -337,6 +337,8 @@ TAC* tacReverse(TAC *tac)
 	return t;
 }
 
+void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic);
+
 void generateAsm(TAC *first)
 {
 	TAC *tac;
@@ -387,22 +389,55 @@ void generateAsm(TAC *first)
 					"	movl	%%eax, %s(%%rip)\n\n", 
 					tac->op1->text, tac->op2->text, tac->res->text);
 				break;
-			// case TAC_LSR:
-			// 	fprintf(fout, " ", );
-			// case TAC_LSE:
-			// 	fprintf(fout, " ", );
-			// case TAC_GTE:
-			// 	fprintf(fout, " ", );
-			// case TAC_EQU:
-			// 	fprintf(fout, " ", );
-			// case TAC_DIF:
-			// 	fprintf(fout, " ", );
+			case TAC_EQU:
+				fprintf(fout, "	# EQU\n");
+				asmComparisonOperation(fout, tac, "je");
+				break;
+
+			case TAC_DIF:
+				fprintf(fout, "	# DIF\n");
+				asmComparisonOperation(fout, tac, "jne");
+				break;
+
+			case TAC_GTE:
+				fprintf(fout, "	# GTE\n");
+				asmComparisonOperation(fout, tac, "jge");
+				break;
+
+			case TAC_LSE:
+				fprintf(fout, "# LSE\n");
+				asmComparisonOperation(fout, tac, "jle");
+				break;
+
+			case TAC_GTR:
+				fprintf(fout, "	# GTR\n");
+				asmComparisonOperation(fout, tac, "jg");
+				break;
+
+			case TAC_LSR:
+				fprintf(fout, "	# LSR\n");
+				asmComparisonOperation(fout, tac, "jl");
+				break;
 			// case TAC_AND:
 			// 	fprintf(fout, " ", );
 			// case TAC_OR:
 			// 	fprintf(fout, " ", );
 			// case TAC_NOT:
 			// 	fprintf(fout, " ", );
+			case TAC_LABEL:
+				fprintf(fout, ".%s:\n", tac->res->text);
+				break; 
+			case TAC_JUMP:
+				fprintf(fout, "	# Jump\n"
+					"	jmp	.%s\n", tac->res->text);
+				break;
+			case TAC_JUMPZ:
+			case TAC_JFALSE:
+				fprintf(fout, "	# Pulo condicional\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	cmpl	$0, %%eax\n"
+					"	je	.%s\n", tac->op1->text, tac->res->text);
+				break;
 			case TAC_DECVEC:
 				break;
 			case TAC_BEGINFUN: 
@@ -474,4 +509,41 @@ void generateAsm(TAC *first)
 	// Hash Table
 	printAsm(fout);
 	fclose(fout);
+}
+
+void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic) {
+	// Copia os operandos para %eax e %ebx
+
+	// Se for literal, precisa ser modo imediato
+	// Caso não seja literal, acessa em relação ao %rip
+	if(tac->op1->type == HASH_LIT_I) {
+		fprintf(fout, "	movl	$%s, %%eax\n", tac->op1->text);
+	}
+	else {
+		fprintf(fout, "	movl	%s(%%rip), %%eax\n", tac->op1->text);
+	}
+
+	if(tac->op2->type == HASH_LIT_I) {
+		fprintf(fout, "	movl $%s, %%ebx\n", tac->op2->text);
+	}
+	else {
+		fprintf(fout, "	movl %s(%%rip), %%ebx\n", tac->op2->text);
+	}
+
+	// Faz a comparação
+	fprintf(fout, "	cmpl %%ebx, %%eax\n");
+
+	// Cria os labels para efetuar os pulos
+	HASH_NODE *label1 = makeLabel();
+	HASH_NODE *label2 = makeLabel();
+
+	// Cria a lógica dos operadore de comparação (baseado nas flags setadas pelo operador 'cmp' já feito)
+	fprintf(fout, "	%s .%s\n\n"
+		"	movl $0, %%eax\n"
+		"	movl %%eax, %s(%%rip)\n"
+		"	jmp .%s\n\n"
+		".%s:\n"
+		"	movl $1, %%eax\n"
+		"	movl %%eax, %s(%%rip)\n\n"
+		".%s:\n", mnemonic, label1->text, tac->res->text, label2->text, label1->text, tac->res->text,	label2->text);
 }

@@ -23,6 +23,7 @@ int get_datatype(int ast_const)
 		case AST_FLOAT: return HASH_DATA_F; break;
 		case AST_INT: 	return HASH_DATA_I; break;
 	}
+	return -1;
 }
 
 AST* get_expr_leaf(AST* node){ while (node->son[0] != NULL) node = node->son[0]; return node; }
@@ -173,7 +174,7 @@ void check_operands(AST *node)
 		case AST_EQU: strcpy(stringType,"EQU"); break;
 		case AST_DIF: strcpy(stringType,"DIF"); break;
 	}
-	if(!check_expr(node, stringType));
+	if(!check_expr(node, stringType))
 		for (i=0; i<MAX_SONS; ++i)
 			check_operands(node->son[i]);
 }

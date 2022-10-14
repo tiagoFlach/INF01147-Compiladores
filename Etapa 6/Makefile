@@ -15,7 +15,7 @@ LEX=lex.yy
 YAC=parser.tab
 SEM=semantic
 TAC=tacs
-IN=input.txt
+IN=input
 OU=output.txt
 ASM=output
 
@@ -35,7 +35,7 @@ $(LEX).c: 	scanner.l
 $(YAC).c:	parser.y
 			bison parser.y $(FLAGS)			
 run:		$(OUT)
-			./$(OUT) $(IN) $(OU)
+			./$(OUT) $(IN).txt $(OU)
 gasm:		
 			gcc -S -o $(ASM).s $(ASM).c 
 gexe:			
