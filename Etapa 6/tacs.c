@@ -21,7 +21,6 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_CALL",
 	"TAC_VECTOR",
 	"TAC_ARG",
-	"TAC_RET",
 	"TAC_EXPN",
 	"TAC_READ",
 	"TAC_PRINT",

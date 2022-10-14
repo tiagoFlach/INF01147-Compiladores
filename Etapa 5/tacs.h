@@ -13,8 +13,6 @@
 
 enum tacSymbol {
 	TAC_SYMBOL,
-	TAC_MOVE,
-
 	TAC_LABEL,
 	TAC_IFZ,
 	TAC_JUMP,
@@ -23,7 +21,6 @@ enum tacSymbol {
 	TAC_CALL,
 	TAC_VECTOR,
 	TAC_ARG,
-	TAC_RET,
 	TAC_EXPN,
 	// Functions
 	TAC_READ,
@@ -51,7 +48,9 @@ enum tacSymbol {
 	TAC_GTR,
 	TAC_VAR,
 	// Initialization
+	TAC_DECVEC,
 	TAC_INTV,
+	TAC_DECVAR,
 	// Lists
 	TAC_MSGL,
 	TAC_EXPL,

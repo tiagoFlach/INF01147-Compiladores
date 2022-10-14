@@ -12,7 +12,6 @@
 
 char * tacType[AST_ARGL+1] = {
 	"TAC_SYMBOL",
-	"TAC_MOVE",
 	"TAC_LABEL",
 	"TAC_IFZ",
 	"TAC_JUMP",
@@ -21,7 +20,6 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_CALL",
 	"TAC_VECTOR",
 	"TAC_ARG",
-	"TAC_RET",
 	"TAC_EXPN",
 	"TAC_READ",
 	"TAC_PRINT",
@@ -43,10 +41,12 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_LSR",
 	"TAC_GTR",
 	"TAC_VAR",
-	"AST_INTV",
+	"TAC_DECVEC",
+	"TAC_INTV",
+	"TAC_DECVAR",
 	"TAC_MSGL",
-	"AST_EXPL",
-	"AST_ARGL",
+	"TAC_EXPL",
+	"TAC_ARGL",
 };
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
@@ -65,7 +65,8 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
-	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR) || (tac->type == TAC_EXPN)) return;
+	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR) || 
+		(tac->type == TAC_EXPN) || (tac->type == TAC_VECTOR)) return;
 	fprintf(stderr, "TAC(");
 
 	if(tac->type <= AST_ARGL) fprintf(stderr, "%s", tacType[tac->type]);
@@ -165,16 +166,18 @@ TAC* generateCode(AST *node)
 			result = makeUnaryOperation(TAC_NOT, code[0], 1);
 			break;
 		case AST_ASSIGN:
-			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 0)));
+			result = tacJoin(code[0], tacJoin(code[1], 
+							tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 
+										code[0]->op1? code[0]->op1 : code[1]->op1? code[1]->op1 : 0)));
 			break;
 		case AST_DECVAR:
-			result = tacJoin(code[1], tacCreate(TAC_COPY, node->symbol, code[1] ? code[1]->res : 0, code[2] ? code[2]->res : 0));
+			result = tacJoin(code[1], tacCreate(TAC_DECVAR, node->symbol, code[1] ? code[1]->res : 0, 0));
 			break;
 		case AST_INTV: 
-			result = tacJoin(code[1], tacCreate(TAC_INTV, code[0]->res, 0, 0));
+			result = tacJoin(tacCreate(TAC_INTV, code[0]->res, 0, 0), code[1]);
 			break;
 		case AST_DECVEC:
-			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_VECTOR, node->symbol, code[1] ? code[1]->res : 0, 0));
+			result = tacJoin(tacCreate(TAC_DECVEC, node->symbol, code[1] ? code[1]->res : 0, 0), tacJoin(code[1], code[2]));
 			break;
 		case AST_ARGL:
 			result = tacJoin(code[1], tacCreate(TAC_ARGL, node->symbol, 0, 0));
