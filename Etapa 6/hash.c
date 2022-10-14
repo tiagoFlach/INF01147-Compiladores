@@ -76,10 +76,21 @@ void printAsm(FILE *fout)
 	fprintf(fout, "## DATA SECTION\n"
 		".data\n");
 	for (i = 0; i < HASH_SIZE; ++i)
-		for (node = Table[i]; node; node = node->next)
+		for (node = Table[i]; node; node = node->next){
 			if (node->type == HASH_VAR)
 				fprintf(fout, " 	%s:	.long	%s\n", node->text, 
 						node->dec? node->dec->son[1]? node->dec->son[1]->symbol->text : "0" : "0");
+			else if(node->type == HASH_VEC){
+				fprintf(fout," 	%s:\n", node->text);
+				if(!node->dec->son[2]){
+					printf("%s", node->dec->son[1]->symbol->text);
+					fprintf(fout, "		.zero	%s\n", node->dec->son[1]->symbol->text);
+				}
+				for(AST* child = node->dec->son[2]; child; child = child->son[1]){
+					fprintf(fout, "		.long	%s\n", child->son[0]->symbol->text);
+				}
+			}
+		}
 }
 
 void hashPrintByType(int type)

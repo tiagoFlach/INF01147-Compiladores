@@ -17,6 +17,7 @@ SEM=semantic
 TAC=tacs
 IN=input.txt
 OU=output.txt
+ASM=output
 
 FLAGS=-d
 ifeq ($(TEST),1)
@@ -35,5 +36,13 @@ $(YAC).c:	parser.y
 			bison parser.y $(FLAGS)			
 run:		$(OUT)
 			./$(OUT) $(IN) $(OU)
+gasm:		
+			gcc -S -o $(ASM).s $(ASM).c 
+gexe:			
+			gcc $(ASM).s -o $(ASM).exe
+grun:			
+			./$(ASM).exe
+cleans: 	
+			find . \( -name '*.s'  -o -name '*.exe' \) -type f -delete
 clean:
-			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' -o -name '*.output' \) -type f -delete
+			find . \( -name '*.o' -o -name '$(LEX).*' -o -name '$(OUT)' -o -name '$(YAC).*' -o -name '*.output' -o -name '*.out' \) -type f -delete

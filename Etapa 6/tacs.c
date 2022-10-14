@@ -8,11 +8,11 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "tacs.h"
 
 char * tacType[AST_ARGL+1] = {
 	"TAC_SYMBOL",
-	"TAC_MOVE",
 	"TAC_LABEL",
 	"TAC_IFZ",
 	"TAC_JUMP",
@@ -43,8 +43,9 @@ char * tacType[AST_ARGL+1] = {
 	"TAC_LSR",
 	"TAC_GTR",
 	"TAC_VAR",
+	"TAC_DECVEC",
 	"AST_INTV",
-	"TAC_DVAR",
+	"TAC_DECVAR",
 	"TAC_MSGL",
 	"AST_EXPL",
 	"AST_ARGL",
@@ -66,7 +67,8 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2)
 void tacPrint(TAC* tac)
 {
 	if (!tac) return;
-	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR) || (tac->type == TAC_EXPN)) return;
+	if ((tac->type == TAC_SYMBOL) || (tac->type == TAC_VAR) || 
+		(tac->type == TAC_EXPN) || (tac->type == TAC_VECTOR)) return;
 	fprintf(stderr, "TAC(");
 
 	if(tac->type <= AST_ARGL) fprintf(stderr, "%s", tacType[tac->type]);
@@ -166,16 +168,18 @@ TAC* generateCode(AST *node)
 			result = makeUnaryOperation(TAC_NOT, code[0], 1);
 			break;
 		case AST_ASSIGN://foi
-			result = tacJoin(code[0], tacJoin(code[1], tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 0)));
+			result = tacJoin(code[0], tacJoin(code[1], 
+							tacCreate(TAC_COPY, code[0]->res, code[1] ? code[1]->res : 0, 
+										code[0]->op1? code[0]->op1 : code[1]->op1? code[1]->op1 : 0)));
 			break;
 		case AST_DECVAR://foi
-			result = tacJoin(code[1], tacCreate(TAC_DVAR, node->symbol, code[1] ? code[1]->res : 0, 0));
+			result = tacJoin(code[1], tacCreate(TAC_DECVAR, node->symbol, code[1] ? code[1]->res : 0, 0));
 			break;
 		case AST_INTV: 
-			result = tacJoin(code[1], tacCreate(TAC_INTV, code[0]->res, 0, 0));
+			result = tacJoin(tacCreate(TAC_INTV, code[0]->res, 0, 0), code[1]);
 			break;
 		case AST_DECVEC:
-			result = tacJoin(tacJoin(code[1], code[2]), tacCreate(TAC_VECTOR, node->symbol, code[1] ? code[1]->res : 0, 0));
+			result = tacJoin(tacCreate(TAC_DECVEC, node->symbol, code[1] ? code[1]->res : 0, 0), tacJoin(code[1], code[2]));
 			break;
 		case AST_ARGL:// tem que vir depois?
 			result = tacJoin(code[1], tacCreate(TAC_ARGL, node->symbol, 0, 0));
@@ -399,6 +403,8 @@ void generateAsm(TAC *first)
 			// 	fprintf(fout, " ", );
 			// case TAC_NOT:
 			// 	fprintf(fout, " ", );
+			case TAC_DECVEC:
+				break;
 			case TAC_BEGINFUN: 
 				fprintf(fout, "## BEGIN FUNCTION\n"
 					".text\n"
@@ -415,15 +421,37 @@ void generateAsm(TAC *first)
 					"	ret\n\n");
 				break;
 			case TAC_COPY: 
+				char res[256], op1[256];
+				memset(res, 0, 256); memset(op1, 0, 256);
+				if(tac->res->type == HASH_VEC && strcmp(tac->op2->text, "0")){
+					int indx = strtoll(tac->op2->text, NULL, 10) * 4;
+					char sindx[10];
+					sprintf(sindx, "%d", indx);
+					strcpy(res, sindx);
+					strcat(res, "+");
+					strcat(res, tac->res->text);
+					strcat(op1, tac->op1->text);
+				} else if (tac->op1->type == HASH_VEC && strcmp(tac->op2->text, "0")) {
+					int indx = strtoll(tac->op2->text, NULL, 10) * 4;
+					char sindx[10];
+					sprintf(sindx, "%d", indx);
+					strcpy(op1, sindx);
+					strcat(op1, "+");
+					strcat(op1, tac->op1->text);
+					strcat(res, tac->res->text);
+				} else {
+					strcpy(res, tac->res->text);
+					strcat(op1, tac->op1->text);
+				}
 				if((tac->op1->type != HASH_LIT_I) && (tac->op1->type != HASH_LIT_C) && 
 					(tac->op1->type != HASH_LIT_F) && (tac->op1->type != HASH_LIT_S))
 				{
 					fprintf(fout, "## ASSIGN VAR\n"
 						"	movl	%s(%%rip), %%eax\n"
-						"	movl	%%eax, %s(%%rip)\n\n", tac->op1->text, tac->res->text);
+						"	movl	%%eax, %s(%%rip)\n\n", op1, res);
 				} else {
 					fprintf(fout, "## ASSIGN LIT\n"
-						"	movl	$%s, %s(%%rip)\n\n", tac->op1->text, tac->res->text);	
+						"	movl	$%s, %s(%%rip)\n\n", op1, res);	
 				}
 				break;
 			case TAC_MSGL: 
