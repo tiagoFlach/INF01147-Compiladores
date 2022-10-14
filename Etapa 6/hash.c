@@ -83,8 +83,10 @@ void printAsm(FILE *fout)
 			else if(node->type == HASH_VEC){
 				fprintf(fout," 	%s:\n", node->text);
 				if(!node->dec->son[2]){
-					printf("%s", node->dec->son[1]->symbol->text);
-					fprintf(fout, "		.zero	%s\n", node->dec->son[1]->symbol->text);
+					int size = strtoll(node->dec->son[1]->symbol->text, NULL, 10) * 4;
+					char ssize[10];
+					sprintf(ssize, "%d", size);
+					fprintf(fout, "		.zero	%s\n", ssize);
 				}
 				for(AST* child = node->dec->son[2]; child; child = child->son[1]){
 					fprintf(fout, "		.long	%s\n", child->son[0]->symbol->text);
