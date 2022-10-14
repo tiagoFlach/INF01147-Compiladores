@@ -417,8 +417,22 @@ void generateAsm(TAC *first)
 				fprintf(fout, "	# OR\n");
 				asmBinaryOperation(fout, tac, "or");
 				break;
-			// case TAC_NOT:
-			// 	fprintf(fout, " ", );
+			case TAC_NOT:
+				HASH_NODE *label1 = makeLabel();
+				HASH_NODE *label2 = makeLabel();
+
+				fprintf(fout, "	# NOT\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	cmpl	$1, %%eax\n"
+					"	je .%s\n"
+					"	movl	$1, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n"
+					"	jmp .%s\n"
+					".%s:\n"
+					"	movl	$0, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n"
+					".%s:\n", tac->op1->text, label1->text, tac->res->text, label2->text, label1->text, tac->res->text, label2->text);
+				break;
 			// case TAC_DECVEC:
 				// break;
 			case TAC_BEGINFUN: 
@@ -435,6 +449,11 @@ void generateAsm(TAC *first)
 					"	popq	%%rbp\n"
 					"	ret\n\n");
 				break;
+			case TAC_CALL:
+				fprintf(fout, "	# Call\n"
+					"	callq	%s\n"
+					"	movl	%%eax, %s(%%rip)\n", tac->op1->text, tac->res->text); 
+				break;
 			case TAC_RETURN:
 				fprintf(fout, "	# Return\n");
 
@@ -446,6 +465,7 @@ void generateAsm(TAC *first)
 				fprintf(fout, "	popq	%%rbp\n"
 					"	retq\n");
 				break;
+			// case TAC_PRINTINT: break;
 			case TAC_COPY: 
 				char res[256], op1[256];
 				memset(res, 0, 256); memset(op1, 0, 256);
@@ -491,26 +511,7 @@ void generateAsm(TAC *first)
 					"	movq	%%rax, %%rdi\n"
 					"	movl	$0, %%eax\n"
 					"	call	printf@PLT\n\n");
-				break;
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			// case TAC_SYMBOL: break;
-
-			// case TAC_PRINTINT: break;
-
-			
+				break;			
 			case TAC_LABEL:
 				fprintf(fout, ".%s:\n", tac->res->text);
 				break; 
@@ -525,6 +526,8 @@ void generateAsm(TAC *first)
 					"	cmpl	$0, %%eax\n"
 					"	je	.%s\n", tac->op1->text, tac->res->text);
 				break;
+			// case TAC_SYMBOL: break;
+			// case TAC_PRINTINT: break;
 			
 			default:
 				break;
