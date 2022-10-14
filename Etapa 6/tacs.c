@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "tacs.h"
 
 char * tacType[AST_ARGL+1] = {
@@ -351,56 +352,150 @@ void generateAsm(TAC *first)
 	{
 		switch (tac->type)
 		{
-			// case TAC_SYMBOL: break;
+			case TAC_ADD:
+				fprintf(fout, "	## ADD\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	addl	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_SUB:
+				fprintf(fout, "	## SUB\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	subl	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_DIV:
+				fprintf(fout, "	## DIV\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%s(%%rip), %%ecx\n"
+					"	cltd\n"
+					"	idivl	%%ecx\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_MUL:
+				fprintf(fout, "	## MUL\n"
+					"	movl	%s(%%rip), %%edx\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	imull	%%edx, %%eax\n"
+					"	movl	%%eax, %s(%%rip)\n\n", 
+					tac->op1->text, tac->op2->text, tac->res->text);
+				break;
+			case TAC_EQU:
+				fprintf(fout, "	# EQU\n");
+				asmComparisonOperation(fout, tac, "je");
+				break;
+			case TAC_DIF:
+				fprintf(fout, "	# DIF\n");
+				asmComparisonOperation(fout, tac, "jne");
+				break;
+			case TAC_GTE:
+				fprintf(fout, "	# GTE\n");
+				asmComparisonOperation(fout, tac, "jge");
+				break;
+			case TAC_LSE:
+				fprintf(fout, "# LSE\n");
+				asmComparisonOperation(fout, tac, "jle");
+				break;
+			case TAC_GTR:
+				fprintf(fout, "	# GTR\n");
+				asmComparisonOperation(fout, tac, "jg");
+				break;
+			case TAC_LSR:
+				fprintf(fout, "	# LSR\n");
+				asmComparisonOperation(fout, tac, "jl");
+				break;
+			// case TAC_AND:
+			// 	fprintf(fout, " ", );
+			// case TAC_OR:
+			// 	fprintf(fout, " ", );
+			// case TAC_NOT:
+			// 	fprintf(fout, " ", );
+			// case TAC_DECVEC:
+				// break;
 			case TAC_BEGINFUN: 
 				fprintf(fout, "## BEGIN FUNCTION\n"
 					"	.globl	%s\n"
 					"	.type	%s, @function\n"
 					"%s:\n"
 					"	pushq	%%rbp\n"
-					"	movq	%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text);
+					"	movq	%%rsp, %%rbp\n\n", tac->res->text, tac->res->text, tac->res->text);
 				break;
 			case TAC_ENDFUN: 
 				fprintf(fout, "## END FUNCTION\n"
+					"	movl	$0, %%eax\n"
 					"	popq	%%rbp\n"
-					"	retq\n");
+					"	ret\n\n");
 				break;
+			case TAC_COPY: 
+				char res[256], op1[256];
+				memset(res, 0, 256); memset(op1, 0, 256);
+				if(tac->res->type == HASH_VEC && strcmp(tac->op2->text, "0")){
+					int indx = strtoll(tac->op2->text, NULL, 10) * 4;
+					char sindx[10];
+					sprintf(sindx, "%d", indx);
+					strcpy(res, sindx);
+					strcat(res, "+");
+					strcat(res, tac->res->text);
+					strcat(op1, tac->op1->text);
+				} else if (tac->op1->type == HASH_VEC && strcmp(tac->op2->text, "0")) {
+					int indx = strtoll(tac->op2->text, NULL, 10) * 4;
+					char sindx[10];
+					sprintf(sindx, "%d", indx);
+					strcpy(op1, sindx);
+					strcat(op1, "+");
+					strcat(op1, tac->op1->text);
+					strcat(res, tac->res->text);
+				} else {
+					strcpy(res, tac->res->text);
+					strcat(op1, tac->op1->text);
+				}
+				if((tac->op1->type != HASH_LIT_I) && (tac->op1->type != HASH_LIT_C) && 
+					(tac->op1->type != HASH_LIT_F) && (tac->op1->type != HASH_LIT_S))
+				{
+					fprintf(fout, "## ASSIGN VAR\n"
+						"	movl	%s(%%rip), %%eax\n"
+						"	movl	%%eax, %s(%%rip)\n\n", op1, res);
+				} else {
+					fprintf(fout, "## ASSIGN LIT\n"
+						"	movl	$%s, %s(%%rip)\n\n", op1, res);	
+				}
+				break;
+			case TAC_MSGL: 
+				fprintf(fout, "## PRINT ARGUMENTS\n"
+					"	movl	%s(%%rip), %%eax\n"
+					"	movl	%%eax, %%esi\n\n", tac->res->text);
+				break;
+			case TAC_PRINT: 
+				fprintf(fout, "## PRINT\n"
+					"	leaq	.printInt(%%rip), %%rax\n" // change it to work with strings too
+					"	movq	%%rax, %%rdi\n"
+					"	movl	$0, %%eax\n"
+					"	call	printf@PLT\n\n");
+				break;
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			// case TAC_SYMBOL: break;
+
 			// case TAC_PRINTINT: break;
 
-			case TAC_EQU:
-				fprintf(fout, "	# EQU\n");
-				asmComparisonOperation(fout, tac, "je");
-				break;
-
-			case TAC_DIF:
-				fprintf(fout, "	# DIF\n");
-				asmComparisonOperation(fout, tac, "jne");
-				break;
-
-			case TAC_GTE:
-				fprintf(fout, "	# GTE\n");
-				asmComparisonOperation(fout, tac, "jge");
-				break;
-
-			case TAC_LSE:
-				fprintf(fout, "# LSE\n");
-				asmComparisonOperation(fout, tac, "jle");
-				break;
-
-			case TAC_GTR:
-				fprintf(fout, "	# GTR\n");
-				asmComparisonOperation(fout, tac, "jg");
-				break;
-
-			case TAC_LSR:
-				fprintf(fout, "	# LSR\n");
-				asmComparisonOperation(fout, tac, "jl");
-				break;
-
-
-
-
-
+			
 			case TAC_LABEL:
 				fprintf(fout, ".%s:\n", tac->res->text);
 				break; 
@@ -427,10 +522,6 @@ void generateAsm(TAC *first)
 }
 
 void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic) {
-	// Copia os operandos para %eax e %ebx
-
-	// Se for literal, precisa ser modo imediato
-	// Caso não seja literal, acessa em relação ao %rip
 	if(tac->op1->type == HASH_LIT_I) {
 		fprintf(fout, "	movl	$%s, %%eax\n", tac->op1->text);
 	}
@@ -439,26 +530,24 @@ void asmComparisonOperation(FILE *fout, TAC *tac, char *mnemonic) {
 	}
 
 	if(tac->op2->type == HASH_LIT_I) {
-		fprintf(fout, "	movl $%s, %%ebx\n", tac->op2->text);
+		fprintf(fout, "	movl	$%s, %%ebx\n", tac->op2->text);
 	}
 	else {
-		fprintf(fout, "	movl %s(%%rip), %%ebx\n", tac->op2->text);
+		fprintf(fout, "	movl	%s(%%rip), %%ebx\n", tac->op2->text);
 	}
 
 	// Faz a comparação
-	fprintf(fout, "	cmpl %%ebx, %%eax\n");
+	fprintf(fout, "	cmpl	%%ebx, %%eax\n");
 
-	// Cria os labels para efetuar os pulos
 	HASH_NODE *label1 = makeLabel();
 	HASH_NODE *label2 = makeLabel();
 
-	// Cria a lógica dos operadore de comparação (baseado nas flags setadas pelo operador 'cmp' já feito)
-	fprintf(fout, "	%s %s\n"
-		"	movl $0, %%eax\n"
-		"	movl %%eax, %s(%%rip)\n"
-		"	jmp %s\n"
+	fprintf(fout, "	%s .%s\n"
+		"	movl	$0, %%eax\n"
+		"	movl	%%eax, %s(%%rip)\n"
+		"	jmp	.%s\n"
 		".%s:\n"
-		"	movl $1, %%eax\n"
-		"	movl %%eax, %s(%%rip)\n"
+		"	movl	$1, %%eax\n"
+		"	movl	%%eax, %s(%%rip)\n"
 		".%s:\n", mnemonic, label1->text, tac->res->text, label2->text, label1->text, tac->res->text,	label2->text);
 }
