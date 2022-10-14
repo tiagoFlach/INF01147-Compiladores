@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "hash.h"
+#include "ast.h"
 
 HASH_NODE *Table[HASH_SIZE];
 
@@ -77,7 +78,8 @@ void printAsm(FILE *fout)
 	for (i = 0; i < HASH_SIZE; ++i)
 		for (node = Table[i]; node; node = node->next)
 			if (node->type == HASH_VAR)
-				fprintf(fout, "_%s:	.long	0\n", node->text);
+				fprintf(fout, " 	%s:	.long	%s\n", node->text, 
+						node->dec? node->dec->son[1]? node->dec->son[1]->symbol->text : "0" : "0");
 }
 
 void hashPrintByType(int type)

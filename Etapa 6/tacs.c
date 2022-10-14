@@ -347,7 +347,7 @@ void generateAsm(TAC *first)
 	"	.section		__TEXT,__text,regular,pure_instructions\n");
 
 	// Each Tac
-	for (tac = first; tac; tac->next)
+	for (tac = first; tac; tac = tac->next)
 	{
 		switch (tac->type)
 		{
