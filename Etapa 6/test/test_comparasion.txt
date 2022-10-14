@@ -1,0 +1,97 @@
+int a(1);
+int b(2);
+int c(3);
+int d(4);
+int e(5);
+int f(6);
+
+int var1(1);
+int var2(2);
+int var3(3);
+
+int main() {
+	## a
+	if (a < 0) {
+		print var1;
+	}
+
+	if (a < 1) {
+		print var2;
+	}
+
+	if (a < 2) {
+		print var3;	## true
+	}
+
+	## b
+	if (b <= 1) {
+		print var1;
+	}
+
+	if (b <= 2) {
+		print var2; ## true
+	}
+
+	if (b <= 3) {
+		print var3; ## true
+	}
+
+	## c
+	if (c == 2) {
+		print var1;
+	}
+
+	if (c == 3) {
+		print var2; ## true
+	}
+
+	if (c == 4) {
+		print var3;
+	}
+
+	## d
+	if (d != 3) {
+		print var1; ## true
+	}
+
+	if (d != 4) {
+		print var2;
+	}
+
+	if (d != 5) {
+		print var3; ## true
+	}
+
+	## e
+	if (e >= 4) {
+		print var1; ## true
+	}
+
+	if (e >= 5) {
+		print var2; ## true
+	}
+
+	if (e >= 6) {
+		print var3;
+	}
+
+	## f
+	if (f > 5) {
+		print var1; ## true
+	}
+
+	if (f > 6) {
+		print var2;
+	}
+
+	if (f > 7) {
+		print var3;
+	}
+
+	## 3
+	## 23
+	## 2
+	## 13
+	## 12
+	## 1
+}

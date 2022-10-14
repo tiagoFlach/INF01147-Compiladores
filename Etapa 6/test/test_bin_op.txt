@@ -1,0 +1,53 @@
+int a(1);
+
+int var1(1);
+int var2(2);
+int var3(3);
+int var3(4);
+
+int main() {
+	## and
+	## true & true
+	if (a >= 1 & a == 1) {
+		print var1;	##true
+	}
+
+	## true & false
+	if (a >= 1 & a == 2) {
+		print var2;
+	}
+
+	## false & true
+	if (a >= 2 & a == 1) {
+		print var3;
+	}
+
+	## false & false
+	if (a >= 2 & a == 2) {
+		print var4;
+	}
+
+	## or
+	## true | true
+	if (a >= 1 | a == 1) {
+		print var1;	##true
+	}
+
+	## true | false
+	if (a >= 1 | a == 2) {
+		print var2; ##true
+	}
+
+	## false | true
+	if (a >= 2 | a == 1) {
+		print var3; ##true
+	}
+
+	## false | false
+	if (a >= 2 | a == 2) {
+		print var4;
+	}
+
+	## 1
+	## 1 2 3
+}
